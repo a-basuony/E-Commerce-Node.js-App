@@ -1,0 +1,192 @@
+1- npm init --save
+2- npm install express --save  => to run server (node app.js)
+3- npm install -D nodemon => to restart the server automatically (nodemon app.js) or in  package.json add "start": "nodemon app.js" to "scripts" => (npm start) or add "dev": "nodemon app.js" to "scripts" => (npm run dev)
+
+4- Environment  Variables:
+    => npm install dotenv
+    => create file config.env : this file has  قيم هتختلف حسب ال ديفلوبمنت مود اللي هنشتغل عليه مثلاً انا ف الديفلومنت حالياً البورت هيختلف في البرودكشن 
+                مثال اخر لما اجي اعمل انتجريشن مع الداتا بيز هيبقي عندي كونكش استرنج و داتابيز باسورد  الداتابيز اللي هتعامل معاها ف الديفلوبمنت مود هتكون مختلفه عن البرودكشن مود 
+                فانا عايز فايل يشيل شويه الكونفجريشنز اللي هتختلف من مكان لمكان 
+    :=> .env   => it's a file that will store all the environment variables
+    - NODE_ENV=development / production
+    - PORT=3000
+    => to access  the env variable in your code 
+        :=> you can use:
+            const dotenv = require('dotenv')
+            dotenv.config({path: 'config.env'})  // config.env is the name of the file
+            console.log(process.env.NODE_ENV);
+            const PORT = process.env.PORT || 3000;
+            app.listen(PORT, () => {
+                console.log("App running on  port ", PORT);
+            });
+
+5-.gitignore file : to specify the files and directories that should be excluded from version control
+    => # dependencies
+        node_modules/
+
+        # environment files
+        .env
+        config.env
+        كدا مش هيرفع الفلدور الفايل علي جت git
+
+6- morgan : . It is an HTTP request logger that can be used to log HTTP requests, response status, response time, and other request and response metadata.
+              This format incorporates some of the most relevant information about the HTTP requests, such as the request method, request URL, response status, response time, and response headers.
+               EX: // GET / 304 5.093 ms - -
+
+          what is middleware? :  it's a function that runs  there is a request or response
+               هي باختصار حاجه بين الريكوست والريسبونس يعني ببساطه جايلي ريكوست هنعمل شويه حجات عليه قبل مبعت الريسبونس 
+               دائماً الميدل وير بتكون قبل مبعت الرووت
+        
+        => npm install morgan
+        => const morgan = require("morgan");
+        => if (process.env.NODE_ENV === "development") {
+                app.use(morgan("dev")); // Log HTTP requests in development 'dev' mode relevant information about the HTTP requests, such as the request method, request URL, response status, response time, and response headers
+                console.log("mode:", process.env.NODE_ENV); // GET / 304 5.093 ms - -
+            }
+
+7- Use Mongodb (NOSQL)
+    => install Mongodb (locally => not recommended)   or using (MongoDB Atlas) as a hosted service
+    => we will use MongoDB Atlas after login
+            - create database ( cluster=> collection) => copy database name
+            - create Database Access(username, password) => copy username, password
+            - Database Access 
+            - connect with MongoDB Compass locally as a GUI تستعرضها علي الاب عندك
+            - copy the ( connection string) => copy connection string
+    
+    => connect app to MongoDB using (Mongoose)
+        - install Mongoose => npm install mongoose
+        - database connection string => DB_URI=mongodb+srv://<username>:<password>@cluster0.2jgswxg.mongodb.net/<DB-name>
+        - app.js : 
+                - const mongoose = require("mongoose");
+                - mongoose
+                        .connect(process.env.DB_URI)
+                        .then((conn) => {
+                            console.log("connected to database successfully!", conn.connection.name);
+                        })
+                        .catch((err) => console.log("Database Error", err));
+                - (document , collection , field ) MongoDB
+                        user = {id:123, name:"ah" ,age: 20}  in sql : id,name,age => column ,  in Mongo: id,name,age => field
+                            {id:123, name:"ah" ,age: 20}  = row => in sql , in Mongo => document
+                            user => table in sql ,in Mongo => collection
+
+    => create model folder => category.js file 
+    => add dataBase models by creating:  1- create the schema for our user model
+                                         2- create a Model using the CategorySchema 
+                                         3- export this model so other files can access it
+
+                                    Example :
+                                                const mongoose = require("mongoose");
+
+                                                const Schema = mongoose.Schema;
+                                                
+                                                // 1- create the schema for our user model
+                                                const categorySchema = new Schema(
+                                                {
+                                                    name: {
+                                                    type: String,
+                                                    required: [true, "Category  name is required"], //  this means that if we don't provide a value for it , an error will be thrown and its message: "Category  name is required"
+                                                    unique: [true, "Category  already exists"],
+                                                    minlength: [3, "Name must be at least 3 characters"],
+                                                    maxlength: [32, "Too long category name"],
+                                                    },
+                                                    // Ahmed Basuony => shopping.com/ahmed-basuony  (space => -, lowercase )
+                                                    // so we use slugify package  to make it like that
+                                                    slug: {
+                                                    type: String,
+                                                    lowercase: true,
+                                                    },
+                                                    image: String,
+                                                },
+                                                { timestamps: true } // to add two fields  createdAt & updatedAt in DB to know category knew  or not
+                                                );
+
+                                                //  2- create a Model using the CategorySchema
+                                                module.exports = mongoose.model("Category", categorySchema);
+
+
+8-Folder Structure : 
+        - src
+            - public
+                - images
+                - Css
+                - JS
+              - models
+                   - category.js
+              - routes
+                   - categories.js
+              - controllers or (services)
+                      - categories.js
+              - views
+                      - index.ejs
+                      - layouts
+              - config 
+                       - db.config.js
+              - app.js
+
+
+9- morgan : is a popular HTTP request logger middleware for Node.js.
+            . It simplifies the process of logging requests in your application by automatically logging request details
+             such as method, URL, status code, response time, and more.
+             It is easy to use and can be integrated into your Node.js applications with just a few lines of code.
+
+    => // Use Morgan middleware to log HTTP requests
+        app.use(morgan('dev'));
+
+    or => if (process.env.NODE_ENV === "development") {
+            app.use(morgan("dev")); // Log HTTP requests in development 'dev' mode relevant information about the HTTP requests, such as the request method, request URL, response status, response time, and response headers
+            //   console.log("mode:", process.env.NODE_ENV);
+            }
+
+
+
+10- هتستلم Business file من السيستم اناليست ف الشركه هتجيلك مكتوب فيه تفاصيل للباك اند زي الاتربيوتس و شكلهم استرنج ولا نمبر و رساله الايرور  ف فايل 
+او هتكتب فايل شبه اللي فوق لو شغال فريلانسنج
+
+11- slugify  : It will convert your text into lowercase letters and replace spaces into dash -
+            // Ahmed Basuony => shopping.com/ahmed-basuony  (space => -, lowercase )
+            // so we use slugify package  to make it like that
+    
+    => install : npm i slugify 
+    => how to use it : 
+                        const slugify = require('slugify')
+                        slugify('Ahmed Mohamed  Basuony',{lower: true}) 
+                         => 'ahmed-mohamed-basuony'
+                        Ex:  const name = req.body.name;   
+                             CategoryModel.create({ name: name, slug: slugify(name) })
+
+
+12- CRUD operation using Mongoose: 
+        ===================== create ========================
+        1- const CategoryModel = require("../models/categoryModel");
+
+        2- app.post('/categories', async (req , res)=>{
+                try {
+                    const category = await CategoryModel.create(req.body) ;
+                    res.json(category);
+                } catch (error) {
+                    res.status(400).send(error);    
+                }
+        });
+
+        (or)
+                 const name = req.body.name;
+            //   const newCategory = new CategoryModel({ name });
+            //   newCategory
+            //     .save()
+            //     .then((doc) => {
+            //       res.json(doc);
+            //     })
+            //     .catch((err) => res.json(err));
+
+        (or)
+                CategoryModel.create({ name: name, slug: slugify(name) })
+                .then((category) => {
+                res.status(201).json({ data: category });
+                })
+                .catch((err) => {
+                console.log(err);
+                res.status(400).send(err);
+                });
+
+        =============== read =========================
+       
