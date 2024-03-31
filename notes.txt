@@ -162,6 +162,7 @@
         2- app.post('/categories', async (req , res)=>{
                 try {
                     const category = await CategoryModel.create(req.body, slug: slugify(name)) ;
+                    const category = await CategoryModel.create(req.body, slug: slugify(name)) ;
                     res.json(category);
                 } catch (error) {
                     res.status(400).send(error);    
@@ -170,6 +171,7 @@
 
         (or)
                  const name = req.body.name;
+            //   const newCategory = new CategoryModel({ name, slug: slugify(name) });
             //   const newCategory = new CategoryModel({ name, slug: slugify(name) });
             //   newCategory
             //     .save()
