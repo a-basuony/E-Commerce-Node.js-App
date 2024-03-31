@@ -17,11 +17,24 @@ app.use(express.json()); //  for parsing body application/json => req.body
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev")); // Log HTTP requests in development 'dev' mode relevant information about the HTTP requests, such as the request method, request URL, response status, response time, and response headers
+  // ex: GET /api/v1/categories 200 155.634 ms - 755
   //   console.log("mode:", process.env.NODE_ENV);
 }
 
-// Routes
+// Mount Routes
 app.use("/api/v1/categories", categoryRoutes); // localhost:3000/api/v1/categories
+
+app.all("*", (req, res, next) => {
+  // create error and send it to error handling middleware
+  // create  a response error to send data back to the client
+  const err = new Error(`Can't find this  route ${req.originalUrl}`);
+  next(err.message);
+});
+
+// Global Error Handling Middleware
+app.use((err, req, res, next) => {
+  res.status(400).json(err);
+});
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
