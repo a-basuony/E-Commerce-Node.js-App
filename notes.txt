@@ -161,7 +161,7 @@
 
         2- app.post('/categories', async (req , res)=>{
                 try {
-                    const category = await CategoryModel.create(req.body) ;
+                    const category = await CategoryModel.create(req.body, slug: slugify(name)) ;
                     res.json(category);
                 } catch (error) {
                     res.status(400).send(error);    
@@ -170,7 +170,7 @@
 
         (or)
                  const name = req.body.name;
-            //   const newCategory = new CategoryModel({ name });
+            //   const newCategory = new CategoryModel({ name, slug: slugify(name) });
             //   newCategory
             //     .save()
             //     .then((doc) => {
@@ -187,6 +187,105 @@
                 console.log(err);
                 res.status(400).send(err);
                 });
+        
+        (or) with async & await & try & catch
 
-        =============== read =========================
-       
+        // =========== using async & await & try & catch
+
+            // const createCategory = async (req, res)=> {
+            //   const name = req.body.name
+            //   try{
+            //     const category = CategoryModel.create({name: name , slug: slugify(name)})
+            //     res.status(201).json({data: category})
+            //   }catch(error){
+            //     res.status(400).json({data: error})
+            //   }
+            // }
+
+
+        (or)  using express-async-handler package
+
+            for handling  async function in route handler
+            Simple middleware for handling exceptions inside of async express routes and passing them to your express error handlers.
+             
+            => install : npm i express-async-handler
+
+            => const asyncHandler = require("express-async-handler");
+                
+            => const createCategory = asyncHandler(async (req, res) => {
+                    const name = req.body.name;
+                    const category = await CategoryModel.create({ name: name, slug: slugify(name) });
+                    res.status(201).json({ data: category });
+                });
+
+
+
+
+13- you can use 
+            router.route("/").get(createCategory).post(createCategory);
+            // instead of
+            // router.get("/", createCategory);
+            // router.post("/", createCategory);
+
+        
+
+14- Write a documentation for you'r api as a comments
+
+        1- put the comment on top of your file like this:
+        2- @desc  describe what is the method do
+        3- @access public or private  (if it is private for admin , if it is public for users)
+        4- @type get or post ... etc
+            or => @route GET /api/categories
+        5- @param {type} paramName description of the parameter
+
+                /**
+                // @desc Get all categories
+                // @route GET /api/categories
+                // @access Public
+                */
+                const getCategories = asyncHandler(async (req, res) => {
+                const categories = await CategoryModel.find({});
+                res.status(200).json({ results: categories.length, data: categories });
+                });
+                    
+                /**
+                // @dec  Get list of categories
+                // @route POST /api/v1/categories
+                // @access Private       //=> ( for admin only)
+                */
+                const createCategory = asyncHandler(async (req, res) => {
+                const name = req.body.name;
+                const category = await CategoryModel.create({
+                    name: name,
+                    slug: slugify(name),
+                });
+                res.status(201).json({ data: category });
+                });
+
+
+
+
+
+
+15- pagination
+    @doc Paginate array of objects using page and limit query parameters
+    
+        => first get page and limit and convert them to skip and limit to send  to mongoose
+        => (get)
+                  const page = req.query.page * 1 || 1; // * 1 to convert string to number and set 1 as a  default value if no page provided
+                  const limit = req.query.limit * 1 || 5;    // default value is 5
+                  const skip = (page - 1) * limit; /// ex: (2-1)*5=5  // to show number of page should skip them to  show the next page content (limit)
+
+        => .skip(skip).limit(limit)   - this will return an array of documents from db
+            to paginate   
+            const categories = await CategoryModel.find({}).skip(skip).limit(limit);
+
+
+
+
+=============== Error Handler =========================
+16- Error handler
+    1- .then() .catch(err => )
+    2- try{} catch(err){}
+    3- asyncHandler(async) ==> express error handler ( CastError: Cast to ObjectId failed )
+      => how to handle express error and convert it to json format

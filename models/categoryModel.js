@@ -6,8 +6,8 @@ const categorySchema = new Schema(
     name: {
       type: String,
       required: [true, "Category  name is required"], //  this means that if we don't provide a value for it , an error will be thrown and its message: "Category  name is required"
-      unique: [true, "Category  already exists"],
-      minlength: [3, "Name must be at least 3 characters"],
+      unique: [true, "Category  already exists"], // Error code 11000 this code  means duplicate key error in MongoDB
+      minlength: [2, "Name must be at least 3 characters"],
       maxlength: [32, "Too long category name"],
     },
     // Ahmed Basuony => shopping.com/ahmed-basuony  (space => -, lowercase )
