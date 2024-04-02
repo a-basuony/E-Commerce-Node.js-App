@@ -4,9 +4,7 @@
 
 4- Environment  Variables:
     => npm install dotenv
-    => create file config.env : this file has  قيم هتختلف حسب ال ديفلوبمنت مود اللي هنشتغل عليه مثلاً انا ف الديفلومنت حالياً البورت هيختلف في البرودكشن 
-                مثال اخر لما اجي اعمل انتجريشن مع الداتا بيز هيبقي عندي كونكش استرنج و داتابيز باسورد  الداتابيز اللي هتعامل معاها ف الديفلوبمنت مود هتكون مختلفه عن البرودكشن مود 
-                فانا عايز فايل يشيل شويه الكونفجريشنز اللي هتختلف من مكان لمكان 
+    => create file config.env : this file has   
     :=> .env   => it's a file that will store all the environment variables
     - NODE_ENV=development / production
     - PORT=3000
@@ -27,7 +25,6 @@
         # environment files
         .env
         config.env
-        كدا مش هيرفع الفلدور الفايل علي جت git
 
 6- morgan : . It is an HTTP request logger that can be used to log HTTP requests, response status, response time, and other request and response metadata.
               This format incorporates some of the most relevant information about the HTTP requests, such as the request method, request URL, response status, response time, and response headers.
@@ -44,12 +41,22 @@
                 console.log("mode:", process.env.NODE_ENV); // GET / 304 5.093 ms - -
             }
 
+9- morgan : is a popular HTTP request logger middleware for Node.js.
+            . It simplifies the process of logging requests in your application by automatically logging request details
+             such as method, URL, status code, response time, and more.
+             It is easy to use and can be integrated into your Node.js applications with just a few lines of code.
+
+    => // Use Morgan middleware to log HTTP requests
+        app.use(morgan('dev'));
+
+ 
+
 7- Use Mongodb (NOSQL)
     => install Mongodb (locally => not recommended)   or using (MongoDB Atlas) as a hosted service
     => we will use MongoDB Atlas after login
             - create database ( cluster=> collection) => copy database name
             - create Database Access(username, password) => copy username, password
-            - Database Access 
+            - Database Access
             - connect with MongoDB Compass locally as a GUI تستعرضها علي الاب عندك
             - copy the ( connection string) => copy connection string
     
@@ -124,23 +131,7 @@
               - app.js
 
 
-9- morgan : is a popular HTTP request logger middleware for Node.js.
-            . It simplifies the process of logging requests in your application by automatically logging request details
-             such as method, URL, status code, response time, and more.
-             It is easy to use and can be integrated into your Node.js applications with just a few lines of code.
 
-    => // Use Morgan middleware to log HTTP requests
-        app.use(morgan('dev'));
-
-    or => if (process.env.NODE_ENV === "development") {
-            app.use(morgan("dev")); // Log HTTP requests in development 'dev' mode relevant information about the HTTP requests, such as the request method, request URL, response status, response time, and response headers
-            //   console.log("mode:", process.env.NODE_ENV);
-            }
-
-
-
-10- هتستلم Business file من السيستم اناليست ف الشركه هتجيلك مكتوب فيه تفاصيل للباك اند زي الاتربيوتس و شكلهم استرنج ولا نمبر و رساله الايرور  ف فايل 
-او هتكتب فايل شبه اللي فوق لو شغال فريلانسنج
 
 11- slugify  : It will convert your text into lowercase letters and replace spaces into dash -
             // Ahmed Basuony => shopping.com/ahmed-basuony  (space => -, lowercase )
@@ -155,81 +146,13 @@
                              CategoryModel.create({ name: name, slug: slugify(name) })
 
 
-12- CRUD operation using Mongoose: 
-        ===================== create ========================
-        1- const CategoryModel = require("../models/categoryModel");
-
-        2- app.post('/categories', async (req , res)=>{
-                try {
-                    const category = await CategoryModel.create(req.body, slug: slugify(name)) ;
-                    const category = await CategoryModel.create(req.body, slug: slugify(name)) ;
-                    res.json(category);
-                } catch (error) {
-                    res.status(400).send(error);    
-                }
-        });
-
-        (or)
-                 const name = req.body.name;
-            //   const newCategory = new CategoryModel({ name, slug: slugify(name) });
-            //   const newCategory = new CategoryModel({ name, slug: slugify(name) });
-            //   newCategory
-            //     .save()
-            //     .then((doc) => {
-            //       res.json(doc);
-            //     })
-            //     .catch((err) => res.json(err));
-
-        (or)
-                CategoryModel.create({ name: name, slug: slugify(name) })
-                .then((category) => {
-                res.status(201).json({ data: category });
-                })
-                .catch((err) => {
-                console.log(err);
-                res.status(400).send(err);
-                });
-        
-        (or) with async & await & try & catch
-
-        // =========== using async & await & try & catch
-
-            // const createCategory = async (req, res)=> {
-            //   const name = req.body.name
-            //   try{
-            //     const category = CategoryModel.create({name: name , slug: slugify(name)})
-            //     res.status(201).json({data: category})
-            //   }catch(error){
-            //     res.status(400).json({data: error})
-            //   }
-            // }
-
-
-        (or)  using express-async-handler package
-
-            for handling  async function in route handler
-            Simple middleware for handling exceptions inside of async express routes and passing them to your express error handlers.
-             
-            => install : npm i express-async-handler
-
-            => const asyncHandler = require("express-async-handler");
-                
-            => const createCategory = asyncHandler(async (req, res) => {
-                    const name = req.body.name;
-                    const category = await CategoryModel.create({ name: name, slug: slugify(name) });
-                    res.status(201).json({ data: category });
-                });
-
-
-
-
 13- you can use 
             router.route("/").get(createCategory).post(createCategory);
             // instead of
             // router.get("/", createCategory);
             // router.post("/", createCategory);
 
-        
+
 
 14- Write a documentation for you'r api as a comments
 
@@ -267,6 +190,45 @@
 
 
 
+12- CRUD operation using Mongoose: 
+        ===================== create ========================
+        1- const CategoryModel = require("../models/categoryModel");
+
+        2- app.post('/categories', async (req , res)=>{
+                try {
+                    const category = await CategoryModel.create(req.body, slug: slugify(name)) ;
+                    res.json(category);
+                } catch (error) {
+                    res.status(400).send(error);    
+                }
+        });
+
+        
+                 const name = req.body.name;
+            //   const newCategory = new CategoryModel({ name, slug: slugify(name) });
+            //   newCategory
+            //     .save()
+            //     .then((doc) => {
+            //       res.json(doc);
+            //     })
+            //     .catch((err) => res.json(err));
+
+
+
+        (or)  using express-async-handler package
+
+            for handling  async function in route handler
+            Simple middleware for handling exceptions inside of async express routes and passing them to your express error handlers.
+             
+            => install : npm i express-async-handler
+
+            => const asyncHandler = require("express-async-handler");
+                
+            => const createCategory = asyncHandler(async (req, res) => {
+                    const name = req.body.name;
+                    const category = await CategoryModel.create({ name: name, slug: slugify(name) });
+                    res.status(201).json({ data: category });
+                });
 
 
 15- pagination
@@ -292,7 +254,7 @@
     3- asyncHandler(async) ==> express error handler ( CastError: Cast to ObjectId failed )
       => how to handle express error and convert it to json format
 
-        => Global  Error Handling middleware and  use it in the main file app.js
+       1 => Global  Error Handling middleware and  use it in the main file app.js
            used to convert error from html to json format
         
             // Global Error Handling Middleware
@@ -300,7 +262,7 @@
             res.status(500).json(err)
             })
         
-        =>  Generate Error and send it back to the client if the route is not found 
+        2 =>  Generate Error and send it back to the client if the route is not found 
             app.all("*", (req, res, next) => {
 
                 // create error and send it to error handling middleware
