@@ -291,3 +291,84 @@
                                     stack: err.stack, // where the error and details
                                 });
                             });
+
+         => use  ApiError class in controller or service if there are an error 
+            you can use it 
+            on operations (getCategoryById , updateCategory, deleteCategory)
+
+            EX: of delete category 
+            :
+                const category = await Category.findByIdAndDelete(id);
+                1- const  ApiError = require('../utils/apiError');
+                2-   if (!category) {
+                        // res.status(404).json({ message: `No category for this id ${id}` });
+                        return next(new ApiError(`No category for this id ${id}`, 404));
+                    }
+
+                    don't forget to return next(new ApiError()) after catching an error
+                    because if we don't return it it gives us {"data": null}
+                    because it will continue to next line which is   res.status(200).json({ data: category });
+
+  => in development mode i need to return this response 
+                                                        res.status(statusCode).json({
+                                                            status: status,
+                                                            error: err,
+                                                            message: message,
+                                                            stack: err.stack, // where the error and details // (OR) Log the error stack trace
+                                                        });  
+                                                    Ex:  {
+                                                            "status": "fail",
+                                                            "error": {
+                                                                "statusCode": 404,
+                                                                "status": "fail",
+                                                                "operational": true
+                                                            },
+                                                            "message": "No category for this id 6600f9610c6a6cfd1e62a6dc",
+                                                            "stack": "Error: No category for this id 6600f9610c6a6cfd1e62a6dc\n    at D:\\projects\\Nodejs\\E-Cmmerce Node.js Udemy\\services\\categoryService.js:31:17\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)"
+                                                        }
+
+    
+  => in production mode i need to return this response : 
+                                   res.status(statusCode).json({
+                                       status,
+                                       message
+                                   })
+
+                                   EX: {
+                                            "status": "fail",
+                                            "message": "No category for this id 6600f9610c6a6cfd1e62a6dc"
+                                        }
+
+   => run the app in with "scripts" in package.json 
+
+                - development mode => "start:dev": "nodemon server.js",
+                    => npm run start:dev
+                - production mode => "start:prod": "SET \"NODE_ENV=production\" && node server.js"
+                    => npm run start:prod
+
+
+ => handle Errors outside express like authenticate with mongodb
+    i was catch the error in 
+                            -   // .catch((err) => {
+                                //   console.log("Database Error", err);
+                                //   process.exit(1); // to shutdown the app
+                                // });
+
+    - instead of i will do in the end of server.js file 
+
+                1- listen on event unhandledRejection using {process.on()}
+                2- inside that event i expect the error and i will console it
+                3- close the server using {server.close()}
+                4- inside close  event also i will console the error and shutdown the app using{ process.exit(1)}
+
+            const server = app.listen(3000)
+            // Handle rejection outside express
+
+            process.on("unhandledRejection", (err) => {
+            // console.log(err);
+            console.log(`UnhandledRejection Errors: ${err.name} | ${err.message}`); //=> UnhandledRejection Errors: MongoServerError | bad auth : Authentication failed.
+            server.close(() => {
+                console.log("Shutting down...");
+                process.exit(1); // to shutdown the app
+            });
+            });

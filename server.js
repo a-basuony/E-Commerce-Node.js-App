@@ -5,6 +5,7 @@ const morgan = require("morgan");
 const categoryRoutes = require("./routes/categoryRoute");
 const ApiError = require("./utils/apiError");
 const dbConnection = require("./config/database");
+const globalError = require("./middlewares/errorMiddleware");
 
 dotenv.config({ path: "config.env" });
 // Connect with db
@@ -24,27 +25,26 @@ if (process.env.NODE_ENV === "development") {
 // Mount Routes
 app.use("/api/v1/categories", categoryRoutes); // localhost:3000/api/v1/categories
 
-// handles requests to non-existent routes
-// if the route is not found
+// Middleware to handle requests to non-existent routes by creating and passing an ApiError to the next middleware
+// If a route does not match any defined routes, this middleware is triggered
 app.all("*", (req, res, next) => {
   next(new ApiError(`Can't find this  route ${req.originalUrl}`, 400));
 });
 
-// Global Error Handling Middleware
-// handles all errors in the application
-app.use((err, req, res, next) => {
-  err.statusCode = err.statusCode || 500;
-  err.status = err.status || "error";
-
-  res.status(err.statusCode).json({
-    status: err.status,
-    error: err,
-    message: err.message,
-    stack: err.stack, // where the error and details
-  });
-});
+// Middleware to handle all errors in the application for express
+app.use(globalError);
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log("App running on  port ", PORT);
+});
+
+// Handle rejection outside express
+process.on("unhandledRejection", (err) => {
+  // console.log(err);
+  console.log(`UnhandledRejection Errors: ${err.name} | ${err.message}`);
+  server.close(() => {
+    console.log("Shutting down...");
+    process.exit(1);
+  });
 });
