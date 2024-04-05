@@ -372,3 +372,76 @@
                 process.exit(1); // to shutdown the app
             });
             });
+
+
+
+17- Validation layer : using express validator
+            install: npm install express-validator
+            
+            getCategory ById ==> used in addProduct & updateProduct handlers
+
+            => working with id => use param  for getting the params from url 
+               const { param, validationResult } = require('express-validator');
+            
+            => working with body => use body  for getting the body 
+               const { body, validationResult } = require('express-validator');
+
+            => working with body and id => use check  for getting the body or id
+            
+               const { check, validationResult } = require('express-validator');
+
+               check('id').isMongoId().withMessage('Invalid ID')
+               check(body).isLength({ min: 5 }).withMessage('Too short!')
+
+           
+
+            1- rules 
+                we use param 
+                :  const { param, validationResult } = require('express-validator');
+                : param('id').isMongoId().withMessage('Invalid Category ID')
+                
+            2- middleware => catch errors from rules if exist
+
+                 (req, res, next) => {
+                        const errors = validationResult(req);
+                        if (!errors.isEmpty()) {
+                            return res.status(400).json({ errors: errors.array() });
+                        }
+                        next();
+                    },
+
+
+             Ex: // Middleware to validate the ID parameter
+                        const validateIdParam = [
+                            // 1- rules
+                            param('id').isInt({ min: 1 }).withMessage('Invalid ID parameter'),
+
+                            // 2- middleware to catch errors from rules if  they exist
+                            (req, res, next) => {
+                                // finds the validation error in req and wraps them in an object
+
+                                const errors = validationResult(req);
+                                if (!errors.isEmpty()) {
+                                return res.status(400).json({ errors: errors.array() });
+                                }
+                                next();
+                            },
+                        ];
+
+
+                    Ex: router.route('/:id').get(validateIdParam , getCategory);
+
+
+
+
+
+
+
+   => catch error from express using error handling middleware 
+   => Handle unhandled routes and send error to error handling middleware 
+   => make our reuseable error class
+   => Handle Errors in development and production env 
+   => handle errors outside express (unhandled Rejections)
+   => Validation Layer benefits and implementation
+
+
