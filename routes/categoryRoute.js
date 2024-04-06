@@ -8,7 +8,6 @@ const {
 } = require("../services/categoryService");
 const router = express.Router();
 // validation layer
-const { param, validationResult } = require("express-validator");
 const {
   getCategoryValidator,
   updateCategoryValidator,
