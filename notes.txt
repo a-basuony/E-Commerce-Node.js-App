@@ -445,3 +445,50 @@
    => Validation Layer benefits and implementation
 
 
+18- working with sub model like : subCategory  belongsTo Category ----->  Category.js Model file
+                         
+
+                         const mongoose = require("mongoose");
+
+                                    const subCategorySchema = new mongoose.Schema(
+                                    {
+                                        name: {
+                                            type: String,
+                                            trim: true,
+                                            unique: [true, "SubCategory must be unique"],
+                                            minLength: [2, "Name must have at least 2 characters"],
+                                            maxLength: [30, "Name can't exceed 30 characters"],
+                                        },
+
+                                        slug: {
+                                            type: String,
+                                            lowerCase: true,
+                                        },
+
+                                        //each subcategory must belong to a parent category.
+
+                                        category: {
+                                            type: mongoose.Schema.ObjectId, 
+                                            ref: "Category",
+                                            required: [true, "SubCategory must be belong to parent category"],
+                                        },
+                                    },
+                                    { timestamps: true }
+                                    );
+
+                                    module.exports = mongoose.model("SubCategory", subCategorySchema);
+
+                    
+                    to create sub model => 
+                        category:{} => is a reference to another Mongoose model ("Category") and is required.
+                                   
+                                                //each subcategory must belong to a parent category.
+                                        category: {
+                                            type: mongoose.Schema.ObjectId,  
+                                                // set to mongoose.Schema.ObjectId, which represents a unique identifier for a document in MongoDB. This indicates that the "category" field will store the unique ID of a document from another collection (in this case, the "Category" collection).
+                                                //The "category" field stores the unique ID of the parent category,
+                                            ref: "Category", 
+                                                // the ref option establishes a relationship between the "SubCategory" and "Category" models.
+                                                // It specifies the name of the referenced model. In this case, it indicates that the "category" field refers to documents in the "Category" model.
+                                            required: [true, "SubCategory must be belong to parent category"],
+                                        },

@@ -39,7 +39,7 @@ const getCategoryById = asyncHandler(async (req, res, next) => {
  // @access Private      //=> (for admin only)
  */
 const createCategory = asyncHandler(async (req, res) => {
-  const name = req.body.name;
+  const { name } = req.body;
   const category = await Category.create({
     name: name,
     slug: slugify(name),

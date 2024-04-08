@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema;
+
+const { Schema } = mongoose;
 // 1- create the schema for our user model
 const categorySchema = new Schema(
   {
