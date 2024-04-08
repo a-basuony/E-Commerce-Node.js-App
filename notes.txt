@@ -586,3 +586,30 @@
               overfetching / underfetching, security concerns, and limited flexibility. 
               It relies on proper schema design and may not suit all use cases, 
               especially complex queries. It also consumes memory and has a learning curve.
+
+
+
+20- Get all subcategories for specific category (Nested Route)
+    get list of subcategories for specific category
+
+    /api/v1/categories (category route)   /:categoryId/subcategories (subcategory route)
+
+    categoryRoute =>   
+          path =>   /api/v1/categories/:categoryId/subcategories  (go to => subcategoriesRoute)
+
+                      const subcategoriesRoute = require('./subcategoryRoute')
+                      router.use('/:categoryId/subcategories' , subcategoriesRoute)
+
+
+    subcategoryRoute => 
+                        const router = express.Router({mergeParams: true})
+
+                        // mergeParams allow us to access parameters on other routers 
+                        // example : we need to access categoryId from category router
+                        // in subcategoryRoute  we need to access categoryId from category router
+                           subcategoryRoute => use categoryId from category router as parameter
+
+                           let filterObject = {}
+                           if(req.params.categoryId) filterObject = {category: req.params.categoryId}
+                           
+                           const subCategories = await SubCategory.find(filterObject)

@@ -14,14 +14,26 @@ exports.getSubCategories = asyncHandler(async (req, res, next) => {
   const limit = req.query.limit || 5;
   const skip = (page - 1) * limit;
 
-  const subCategory = await SubCategory.find({})
+  let filterObject = {};
+  if (req.params.categoryId) {
+    filterObject = { categoryId: req.params.categoryId };
+  }
+  console.log("Filter Object:", filterObject);
+
+  const subCategory = await SubCategory.find(filterObject)
     .skip(skip)
     .limit(limit)
-    .populate({ path: "category", select: "name " }); // -_id;
+    .populate({ path: "category", select: "name" })
+    .catch((err) => {
+      console.error("Error fetching subcategories:", err);
+      return next(new ApiError("Failed to get Subcategories", 500));
+    });
+
+  // -_id;
   // is used to fetch and include data from another collection related to the current one, and specify which fields from the related documents should be included in the response.
   //This populates the "category" field in the subcategory documents, selecting only the "name" field and excluding the "_id" field from the related category documents.
   if (!subCategory) {
-    next(new ApiError("Failed to get Subcategories", 400));
+    return next(new ApiError("Failed to get Subcategories", 400));
   }
   res
     .status(200)
@@ -37,7 +49,7 @@ exports.getSpecificSubCategory = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
   const subCategory = await SubCategory.findById(id).populate({
     path: "category",
-    select: "name -_id",
+    select: "name",
   });
   if (!subCategory) {
     next(new ApiError(`No subCategory for this this id: ${id}`, 404));
