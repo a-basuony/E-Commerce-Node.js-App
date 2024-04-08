@@ -6,6 +6,8 @@ const {
   createSubCategory,
   getSubCategories,
   getSpecificSubCategory,
+  updateSubCategory,
+  deleteSubCategory,
 } = require("../services/subCategoryService");
 
 // validation layer
@@ -22,6 +24,10 @@ router
   .get(getSubCategories)
   .post(createSubCategoryValidator, createSubCategory);
 
-router.route("/:id").get(getSubCategoryValidator, getSpecificSubCategory);
+router
+  .route("/:id")
+  .get(getSubCategoryValidator, getSpecificSubCategory)
+  .put(updateSubCategoryValidator, updateSubCategory)
+  .delete(deleteSubCategoryValidator, deleteSubCategory); //localhost:3000/api/v1/subcategories/66082b89921a97fa27a5f5d9
 
 module.exports = router;
