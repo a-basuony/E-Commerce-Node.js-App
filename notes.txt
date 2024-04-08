@@ -492,3 +492,97 @@
                                                 // It specifies the name of the referenced model. In this case, it indicates that the "category" field refers to documents in the "Category" model.
                                             required: [true, "SubCategory must be belong to parent category"],
                                         },
+
+19- The `.populate()` method in Mongoose is used to retrieve and include related data from other documents or models,
+    based on defined relationships. It simplifies data fetching by automatically replacing references with actual related documents.
+
+
+    to show the parent category in the "SubCategory" model as a child of the "Category" model you need to populate it.
+                                     /**
+                                            * @desc     Get all SubCategories
+                                            * @route    GET /api/v1/Subcategories
+                                            * @access   Public
+                                            */
+                                            exports.getSubCategories = asyncHandler(async (req, res, next) => {
+                                            const page = req.query.page || 1;
+                                            const limit = req.query.limit || 5;
+                                            const skip = (page - 1) * limit;
+
+                                            const subCategory = await SubCategory.find({})
+                                                .skip(skip)
+                                                .limit(limit)
+                                                .populate({ path: "category", select: "name -_id" });
+                                            // is used to fetch and include data from another collection related to the current one, and specify which fields from the related documents should be included in the response.
+                                            //This populates the "category" field in the subcategory documents, selecting only the "name" field and excluding the "_id" field from the related category documents.
+                                            if (!subCategory) {
+                                                next(new ApiError("Failed to get Subcategories", 400));
+                                            }
+                                            res
+                                                .status(200)
+                                                .json({ results: subCategory.length, page, data: subCategory });
+                                            });
+
+                                            Example: {
+                                                        "_id": "6612d9f863d08fc4f20ed3a1",
+                                                        "name": "HP",
+                                                        "slug": "HP",
+                                                        "category": {
+                                                            "name": "Clothes And Shoose",
+                                                        },
+                                                        "createdAt": "2024-04-07T17:38:00.057Z",
+                                                        "updatedAt": "2024-04-07T17:38:00.057Z",
+                                                        "__v": 0
+                                                    },
+
+
+
+              the parent category in the "SubCategory" model as a child of the "Category" model you need to populate       
+
+              --------------
+                populate({ path: "category", select: "name -_id" });   // the parent category in the "category" 
+
+            ==> "category"  refers to the category field in "subCategory" model
+            ==> select "name" refers to the name field in "category" model the parent
+            ==> -_id to remove the id from the "category" model
+
+                category: {
+                        type: mongoose.Schema.ObjectId, 
+                        ref: "Category", 
+                        required: [true, "SubCategory must be belong to parent category"],
+                    },
+
+
+       use cases     ------------------- 1- show category the parent category with all fields --------
+            with =>  .populate({ path: "category"});
+
+            ex: "category": {
+                                    "_id": "66082b89921a97fa27a5f5d9",
+                                    "name": "Clothes And Shoose",
+                                    "slug": "clothes-and-shoose",
+                                    "createdAt": "2024-03-30T15:11:05.360Z",
+                                    "updatedAt": "2024-03-30T15:11:05.360Z",
+                                    "__v": 0
+                                },
+
+                    ----------- 2- remove id from the parent and show the name fields only ----------------
+                .populate({ path: "category", select: "name -_id" });
+
+                ex:  "category": {
+                                "name": "Clothes And Shoose"
+                            },
+
+                 -------------- 3-  show the id automatically and name field with select --------------
+
+                    .populate({ path: "category", select: "name" });
+                    ex:    "category": {
+                                "_id": "66082b89921a97fa27a5f5d9",
+                                "name": "Clothes And Shoose"
+                            },
+
+
+        disadvantage of populate 
+            While the `.populate()` method in Mongoose simplifies data retrieval for related documents,
+              it can introduce performance overhead, complexity, data consistency issues,
+              overfetching / underfetching, security concerns, and limited flexibility. 
+              It relies on proper schema design and may not suit all use cases, 
+              especially complex queries. It also consumes memory and has a learning curve.

@@ -14,7 +14,12 @@ exports.getSubCategories = asyncHandler(async (req, res, next) => {
   const limit = req.query.limit || 5;
   const skip = (page - 1) * limit;
 
-  const subCategory = await SubCategory.find({}).skip(skip).limit(limit);
+  const subCategory = await SubCategory.find({})
+    .skip(skip)
+    .limit(limit)
+    .populate({ path: "category", select: "name " }); // -_id;
+  // is used to fetch and include data from another collection related to the current one, and specify which fields from the related documents should be included in the response.
+  //This populates the "category" field in the subcategory documents, selecting only the "name" field and excluding the "_id" field from the related category documents.
   if (!subCategory) {
     next(new ApiError("Failed to get Subcategories", 400));
   }
@@ -30,7 +35,10 @@ exports.getSubCategories = asyncHandler(async (req, res, next) => {
  */
 exports.getSpecificSubCategory = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const subCategory = await SubCategory.findById(id);
+  const subCategory = await SubCategory.findById(id).populate({
+    path: "category",
+    select: "name -_id",
+  });
   if (!subCategory) {
     next(new ApiError(`No subCategory for this this id: ${id}`, 404));
   }
@@ -42,7 +50,6 @@ exports.getSpecificSubCategory = asyncHandler(async (req, res, next) => {
  * @route    POST /api/v1/Subcategories
  * @access   Private
  */
-
 exports.createSubCategory = asyncHandler(async (req, res) => {
   const { name, category } = req.body;
   const subCategory = await SubCategory.create({
@@ -81,13 +88,13 @@ exports.updateSubCategory = asyncHandler(async (req, res, next) => {
 
 /**
  * @desc     Delete subCategory with id
- * @route    DELETE  api/v1/subcategories
+ * @route    DELETE  api/v1/subcategories/:id
  * @access   Private
  */
 exports.deleteSubCategory = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const category = await SubCategory.findByIdAndDelete(id);
-  if (!category) {
+  const subCategory = await SubCategory.findByIdAndDelete(id);
+  if (!subCategory) {
     return next(new ApiError("SubCategory not found", 404));
   }
   res.status(204).send();
