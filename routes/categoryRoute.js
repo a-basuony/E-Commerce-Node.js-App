@@ -7,7 +7,7 @@ const {
   deleteCategory,
 } = require("../services/categoryService");
 
-const router = express.Router({ mergeParams: true });
+const router = express.Router();
 // validation layer
 const {
   getCategoryValidator,
@@ -16,9 +16,9 @@ const {
   createCategoryValidator,
 } = require("../utils/validators/categoryValidator");
 
-const subCategoryRoute = require("./subCategoryRoute");
+const subCategoriesRoute = require("./subCategoryRoute");
 
-router.use("/:categoryId/subcategories", subCategoryRoute);
+router.use("/:categoryId/subcategories", subCategoriesRoute);
 
 router
   .route("/")

@@ -589,19 +589,25 @@
 
 
 
-20- Get all subcategories for specific category (Nested Route)
+20- Get all subcategories for specific category (Nested Route)  
     get list of subcategories for specific category
+
+    (nested route)
+    get child from parent 
+    Example:
+    * GEt /api/v1/categories/:categoryId/subcategories
+    * GEt /api/v1/products/:productId/reviews
 
     /api/v1/categories (category route)   /:categoryId/subcategories (subcategory route)
 
-    categoryRoute =>   
+    1- categoryRoute =>   
           path =>   /api/v1/categories/:categoryId/subcategories  (go to => subcategoriesRoute)
 
                       const subcategoriesRoute = require('./subcategoryRoute')
                       router.use('/:categoryId/subcategories' , subcategoriesRoute)
 
 
-    subcategoryRoute => 
+   2- subcategoryRoute => 
                         const router = express.Router({mergeParams: true})
 
                         // mergeParams allow us to access parameters on other routers 
@@ -613,3 +619,97 @@
                            if(req.params.categoryId) filterObject = {category: req.params.categoryId}
                            
                            const subCategories = await SubCategory.find(filterObject)
+
+                           example:
+                            exports.getSubCategories = asyncHandler(async (req, res, next) => {
+                                            const page = req.query.page || 1;
+                                            const limit = req.query.limit || 5;
+                                            const skip = (page - 1) * limit;
+
+                                            let filterObject = {};
+                                            if (req.params.categoryId) {
+                                                filterObject = { category: req.params.categoryId };
+                                            }
+                                            // console.log("Filter Object:", filterObject);
+
+                                            const subCategory = await SubCategory.find(filterObject)
+                                                .skip(skip)
+                                                .limit(limit)
+                                                .populate({ path: "category", select: "name" })
+
+                                            // -_id;
+                                            // is used to fetch and include data from another collection related to the current one, and specify which fields from the related documents should be included in the response.
+                                            //This populates the "category" field in the subcategory documents, selecting only the "name" field and excluding the "_id" field from the related category documents.
+                                            if (!subCategory) {
+                                                return next(new ApiError("Failed to get Subcategories", 400));
+                                            }
+                                            res
+                                                .status(200)
+                                                .json({ results: subCategory.length, page, data: subCategory });
+                                        });
+
+
+21- Create SubCategory on Category (nested Route)
+
+                1- // middleware used to create an object (filterObject) based on categoryId from req.params
+                    //  it sets the category field in the filterObject to the categoryId
+                    // Then, it assigns the filterObject to the req.filterObj property
+
+                    1=> exports.createFilterObj = (req, res, next) => {
+                            let filterObject = {};
+                            if (req.params.categoryId) {
+                                filterObject = { category: req.params.categoryId };
+                            }
+                            req.filterObj = filterObject;
+                            next();
+                        };
+
+                        2=> exports.getSubCategories = asyncHandler(async (req, res, next) => {
+                                const page = req.query.page || 1;
+                                const limit = req.query.limit || 5;
+                                const skip = (page - 1) * limit;
+                                // console.log("Filter Object:", filterObject);
+                                const subCategory = await SubCategory.find(req.filterObj)
+                                    .skip(skip)
+                                    .limit(limit)
+                                    .populate({ path: "category", select: "name" })
+                                    if (!subCategory) {
+                                            return next(new ApiError("Failed to get Subcategories", 400));
+                                        }
+                                        res
+                                            .status(200)
+                                            .json({ results: subCategory.length, page, data: subCategory });
+                             });
+
+                             3=> router
+                                    .route("/")
+                                    .get(createFilterObj, getSubCategories)
+                ----------------------------
+                2- middleware function that is used to set the category field in the request body to the categoryId from the request params
+                    1=> 
+                         exports.setCategoryIdToBody = (req, res, next) => {
+                        if (!req.body.category) {
+                            req.body.category = req.params.categoryId;
+                        }
+                        next();
+                        };
+
+                    2=> 
+                        exports.createSubCategory = asyncHandler(async (req, res) => {
+                                const { name, category } = req.body;
+                                const subCategory = await SubCategory.create({
+                                    name: name,
+                                    slug: slugify(name),
+                                    category, //  as a body it will be added as a subcategory of the provided category
+                                });
+
+                                if (!subCategory) {
+                                    throw new ApiError("Failed to create Subcategory", 400);
+                                }
+                                res.status(201).json({ data: subCategory });
+                                });
+
+                        3=> router
+                            .route("/")
+                            .post(setCategoryIdToBody, createSubCategoryValidator, createSubCategory);
+

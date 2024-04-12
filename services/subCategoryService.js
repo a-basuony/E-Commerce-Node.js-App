@@ -4,7 +4,21 @@ const asyncHandler = require("express-async-handler");
 const SubCategory = require("../models/subCategoryModel");
 const ApiError = require("../utils/apiError");
 
+// middleware used to create an object (filterObject) based on categoryId from req.params
+//  it sets the category field in the filterObject to the categoryId
+// Then, it assigns the filterObject to the req.filterObj property
+exports.createFilterObj = (req, res, next) => {
+  let filterObject = {};
+  if (req.params.categoryId) {
+    filterObject = { category: req.params.categoryId };
+  }
+  req.filterObj = filterObject;
+  next();
+};
+
 /**
+ * GEt /api/v1/categories/:categoryId/subcategories
+ * GEt /api/v1/products/:productId/reviews
  * @desc     Get all SubCategories
  * @route    GET /api/v1/Subcategories
  * @access   Public
@@ -13,14 +27,8 @@ exports.getSubCategories = asyncHandler(async (req, res, next) => {
   const page = req.query.page || 1;
   const limit = req.query.limit || 5;
   const skip = (page - 1) * limit;
-
-  let filterObject = {};
-  if (req.params.categoryId) {
-    filterObject = { categoryId: req.params.categoryId };
-  }
-  console.log("Filter Object:", filterObject);
-
-  const subCategory = await SubCategory.find(filterObject)
+  // console.log("Filter Object:", filterObject);
+  const subCategory = await SubCategory.find(req.filterObj)
     .skip(skip)
     .limit(limit)
     .populate({ path: "category", select: "name" })
@@ -57,6 +65,13 @@ exports.getSpecificSubCategory = asyncHandler(async (req, res, next) => {
   res.status(200).json({ data: subCategory });
 });
 
+// middleware function that is used to set the category field in the request body to the categoryId from the request params
+exports.setCategoryIdToBody = (req, res, next) => {
+  if (!req.body.category) {
+    req.body.category = req.params.categoryId;
+  }
+  next();
+};
 /**
  * @desc     Create SubCategory
  * @route    POST /api/v1/Subcategories
