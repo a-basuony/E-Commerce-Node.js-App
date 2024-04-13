@@ -1,9 +1,11 @@
 const express = require("express");
+
 const dotenv = require("dotenv");
 const morgan = require("morgan");
 
 const categoryRoutes = require("./routes/categoryRoute");
 const subCategoryRoutes = require("./routes/subCategoryRoute");
+const brandRoutes = require("./routes/brandRoute");
 const ApiError = require("./utils/apiError");
 const dbConnection = require("./config/database");
 const globalError = require("./middlewares/errorMiddleware");
@@ -26,6 +28,7 @@ if (process.env.NODE_ENV === "development") {
 // Mount Routes
 app.use("/api/v1/categories", categoryRoutes); // localhost:3000/api/v1/categories
 app.use("/api/v1/subcategories", subCategoryRoutes); // localhost:3000/api/v1/subcategories
+app.use("/api/v1/brands", brandRoutes); // localhost:3000/api/v1/brands
 
 // Middleware to handle requests to non-existent routes by creating and passing an ApiError to the next middleware
 // If a route does not match any defined routes, this middleware is triggered
