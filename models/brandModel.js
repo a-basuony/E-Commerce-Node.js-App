@@ -10,6 +10,7 @@ const brandSchema = new Schema(
       unique: [true, "brand name is already exist"],
       minLength: [2, "brand name must be at least 2 characters long"],
       maxLength: [32, "brand name must be at most 32 characters long"],
+      trim: true,
     },
     slug: {
       type: String,

@@ -713,3 +713,11 @@
                             .route("/")
                             .post(setCategoryIdToBody, createSubCategoryValidator, createSubCategory);
 
+---------------------------- SUMMARY -------------------------
+    - Category CRUD operations 
+    - SubCategory CRUD operations 
+    - Brands CRUD operations 
+    - validation
+    - Eslint configurations
+    - Populate()  select()
+    - Nested Routes with {mergeParams: true}
