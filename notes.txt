@@ -721,3 +721,12 @@
     - Eslint configurations
     - Populate()  select()
     - Nested Routes with {mergeParams: true}
+
+(notes)
+    => price type Number (when create a model) 
+        maxLength - max : [number, "error message"]
+        minLength - min : [number, "error message"]
+
+    => description type String 
+            => maxLength - maxlength : [number, "error message"]
+            => minLength - minlength : [number, "error message"]

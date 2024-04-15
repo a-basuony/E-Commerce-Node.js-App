@@ -34,7 +34,7 @@ const getCategoryById = asyncHandler(async (req, res, next) => {
 });
 
 /**
- // @dec  Get list of categories
+ // @dec  create a new category
  // @route POST /api/v1/categories
  // @access Private      //=> (for admin only)
  */
