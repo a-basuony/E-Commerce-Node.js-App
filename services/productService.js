@@ -49,6 +49,7 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
  */
 exports.createProduct = asyncHandler(async (req, res, next) => {
   req.body.slug = slugify(req.body.title);
+
   const product = await Product.create(req.body);
   if (!product) {
     return next(new ApiError("Failed to create product", 400));
