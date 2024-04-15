@@ -718,7 +718,7 @@
                             .route("/")
                             .post(setCategoryIdToBody, createSubCategoryValidator, createSubCategory);
 
----------------------------- SUMMARY -------------------------
+    ---------------------------- SUMMARY -------------------------
     - Category CRUD operations 
     - SubCategory CRUD operations 
     - Brands CRUD operations 
@@ -727,11 +727,73 @@
     - Populate()  select()
     - Nested Routes with {mergeParams: true}
 
-(notes)
-    => price type Number (when create a model) 
-        maxLength - max : [number, "error message"]
-        minLength - min : [number, "error message"]
+            (notes)
+                => price type Number (when create a model) 
+                    maxLength - max : [number, "error message"]
+                    minLength - min : [number, "error message"]
 
-    => description type String 
-            => maxLength - maxlength : [number, "error message"]
-            => minLength - minlength : [number, "error message"]
+                => description type String 
+                        => maxLength - maxlength : [number, "error message"]
+                        => minLength - minlength : [number, "error message"]
+
+
+22- create product model => product Service => product Validator 
+
+       1 => product Validator
+                = you can create a custom validator 
+                = to check if the category existence in our DB
+                        .custom((categoryId, { req }) =>
+                            Category.findById(categoryId).then((category) => {
+                                if (!category) {
+                                return Promise.reject(
+                                    new Error(`No category for this id: ${categoryId}`)
+                                );
+                                }
+                            })
+                            ),  
+
+              
+                 Full Example    check("category")
+                                    .notEmpty()
+                                    .withMessage("product must be belong to a category")
+                                    .isMongoId()
+                                    .withMessage("Category must be a valid MongoDB ObjectId")
+                                    .custom((categoryId, { req }) =>
+                                        Category.findById(categoryId).then((category) => {
+                                            if (!category) {
+                                            return Promise.reject(
+                                                new Error(`No category for this id: ${categoryId}`)
+                                            );
+                                        }
+                                    })
+                                    ),
+
+
+
+        2- in product Validator 
+            = check on subCategories id as an array of objects 
+              to check if subCategories existence in my DB before adding product
+
+                .custom((subcategoriesIds) =>
+                            Subcategory.find({ _id: { $exist: true, $in: subcategoriesIds } }).then( (result) =>{
+                                if(result.length < 1 || result.length !== subcategoriesIds){
+                                return Promise.reject(
+                                    new Error("Invalid subcategory id format")
+                                );
+                                }
+                            })
+                ),
+
+           Example:     check("subcategories")
+                            .optional()
+                            .isMongoId()
+                            .withMessage("Subcategory must be a valid MongoDB ObjectId")
+                            .custom((subcategoriesIds) =>
+                                Subcategory.find({ _id: { $exist: true, $in: subcategoriesIds } }).then( (result) =>{
+                                    if(result.length < 1 || result.length !== subcategoriesIds){
+                                    return Promise.reject(
+                                        new Error("Invalid subcategory id format")
+                                    );
+                                    }
+                                })
+                            ),

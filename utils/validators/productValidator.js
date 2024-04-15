@@ -1,6 +1,7 @@
 const { check, param, body } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 const Category = require("../../models/categoryModel");
+const Subcategory = require("../../models/subCategoryModel");
 
 exports.createProductValidator = [
   check("title")
@@ -70,10 +71,19 @@ exports.createProductValidator = [
         }
       })
     ),
-  check("subcategory")
+  check("subcategories")
     .optional()
     .isMongoId()
-    .withMessage("Subcategory must be a valid MongoDB ObjectId"),
+    .withMessage("Subcategory must be a valid MongoDB ObjectId")
+    .custom((subcategoriesIds) =>
+      Subcategory.find({ _id: { $exist: true, $in: subcategoriesIds } }).then(
+        (result) => {
+          if (result.length < 1 || result.length !== subcategoriesIds) {
+            return Promise.reject(new Error("Invalid subcategory id format"));
+          }
+        }
+      )
+    ),
   check("brand")
     .optional()
     .isMongoId()
