@@ -35,7 +35,7 @@ const productSchema = new mongoose.Schema(
       required: [true, "product price is required"],
       trim: true,
       min: [0, "Product price must be at least 0"],
-      max: [20, "Too long product price"],
+      max: [200000, "Too long product price"],
     },
     priceAfterDiscount: {
       type: Number,
