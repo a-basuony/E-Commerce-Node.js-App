@@ -498,6 +498,11 @@
 
 
     to show the parent category in the "SubCategory" model as a child of the "Category" model you need to populate it.
+
+ .populate({
+    path: "category", // the name of field in model
+    select: "name - _id - filedName",   
+  })
                                      /**
                                             * @desc     Get all SubCategories
                                             * @route    GET /api/v1/Subcategories

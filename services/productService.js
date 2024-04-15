@@ -15,7 +15,10 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   const limit = req.query.limit * 1 || 5;
   const skip = (page - 1) * limit;
 
-  const products = await Product.find({}).skip(skip).limit(limit);
+  const products = await Product.find({})
+    .skip(skip)
+    .limit(limit)
+    .populate({ path: "category", select: "name -_id" });
   if (!products) {
     return next(new ApiError("Products not found", 404));
   }
@@ -29,7 +32,10 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
  */
 exports.getProduct = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const product = await Product.findById(id);
+  const product = await Product.findById(id).populate({
+    path: "category",
+    select: "name",
+  });
   if (!product) {
     return next(new ApiError(`there is no product for this id: ${id}`, 404));
   }
@@ -57,10 +63,15 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
  */
 exports.updateProduct = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  req.body.slug = slugify(req.body.title);
+  if (req.body.title) {
+    req.body.slug = slugify(req.body.title);
+  }
 
   const product = await Product.findByIdAndUpdate({ _id: id }, req.body, {
     new: true,
+  }).populate({
+    path: "category",
+    select: "name",
   });
   if (!product) {
     return next(

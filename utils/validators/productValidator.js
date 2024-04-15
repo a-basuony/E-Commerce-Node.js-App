@@ -9,14 +9,7 @@ exports.createProductValidator = [
     .withMessage("Product title must be between 2 and 100 characters")
     .notEmpty()
     .withMessage("Product required"),
-  check("slug")
-    .notEmpty()
-    .withMessage("Product required")
-    .isString()
-    .isLength({ max: 2000 })
-    .withMessage("Too long description")
-    .isLowercase()
-    .withMessage("Slug must be a lowercase string"),
+  check("slug").isLowercase().withMessage("Slug must be a lowercase string"),
   check("description")
     .isString()
     .isLength({ min: 2, max: 1000 })
@@ -116,7 +109,7 @@ exports.updateProductValidator = [
     .withMessage("Quantity must be a non-negative integer"),
   body("price")
     .optional()
-    .isFloat({ min: 0, max: 20 })
+    .isFloat({ min: 0, max: 200000 })
     .withMessage("Price must be a float between 0 and 20"),
   body("imageCover")
     .optional()
