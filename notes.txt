@@ -800,7 +800,37 @@
 
         2- in product Validator 
               => check and validate Subcategories belong to Category
-                    
+
+
+                    .custom(async (subcategoriesIds, { req }) => {
+                            const categoryId = req.body.category; 
+                            const subcategories = await Subcategory.find({
+                                _id: { $in: subcategoriesIds },
+                                category: categoryId,
+                            });
+                            if (subcategories.length !== subcategoriesIds.length) {
+                                return Promise.reject(
+                                new Error("Subcategories do not belong to the category")
+                                );
+                            }
+                        }),  
+
+                => another way to validate 
+                            .custom((val, { req }) => {
+                                        Subcategory.find({ category: req.body.category }).then(
+                                            (subcategories) => {
+                                            const subCategoriesIdsInDB = [];
+                                            subcategories.forEach((subcategory) => {
+                                                subCategoriesIdsInDB.push(subcategory._id.toString());
+                                            });
+                                            if (!val.every((v) => subCategoriesIdsInDB.includes(v))) {
+                                                return Promise.reject(
+                                                new Error("Subcategories do not belong to the category")
+                                                );
+                                            }
+                                            }
+                                        );
+                                        })
 
 
 

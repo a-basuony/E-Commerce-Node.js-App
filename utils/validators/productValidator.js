@@ -95,6 +95,21 @@ exports.createProductValidator = [
         );
       }
     }),
+  // .custom((val, { req }) => {
+  //   Subcategory.find({ category: req.body.category }).then(
+  //     (subcategories) => {
+  //       const subCategoriesIdsInDB = [];
+  //       subcategories.forEach((subcategory) => {
+  //         subCategoriesIdsInDB.push(subcategory._id.toString());
+  //       });
+  //       if (!val.every((v) => subCategoriesIdsInDB.includes(v))) {
+  //         return Promise.reject(
+  //           new Error("Subcategories do not belong to the category")
+  //         );
+  //       }
+  //     }
+  //   );
+  // }),
   check("brand")
     .optional()
     .isMongoId()
