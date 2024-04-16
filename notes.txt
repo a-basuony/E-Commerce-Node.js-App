@@ -844,7 +844,53 @@
                 example: (" will be printed in green color in the console.)
 
                         const colors = require('colors');
-                        
+
                         console.log('Hello, world!'.green);
                         console.log("Data Inserted".green.inverse);
 
+        2- upload dummy data and seeder.js file (this data can i filter it and sort )
+             => first we delete all stored data and then upload the dummy data
+
+        3- run seeder.js file
+
+                - node seeder.js -d   => to delete all data 
+                - node seeder.js -i    => to to add dummy data 
+
+24- filter in mongoose 
+
+     send filter as a query params =>    localhost:3000/api/v1/products?price=109.95&ratingsAverage=4.3
+
+     (best way) 1-   const products = await Product.find({
+                                                price: req.query.price,
+                                                ratingsAverage: req.query.ratingsAverage,
+                                            })
+                                            .skip(skip)
+                                            .limit(limit)
+
+     (or)  2-   const products = await Product.find({})
+                                                .where("price")
+                                                .equals(req.query.price)
+                                                .where("ratingsAverage")
+                                                .equals(req.query.ratingsAverage)
+                                                .skip(skip)
+                                                .limit(limit)
+                                                .populate({ path: "category", select: "name -_id" });
+
+        Example: 
+                    exports.getProducts = asyncHandler(async (req, res, next) => {
+                            const page = req.query.page * 1 || 1;
+                            const limit = req.query.limit * 1 || 5;
+                            const skip = (page - 1) * limit;
+
+                            const products = await Product.find({
+                                price: req.query.price,
+                                ratingsAverage: req.query.ratingsAverage,
+                            })
+                                .skip(skip)
+                                .limit(limit)
+                                .populate({ path: "category", select: "name -_id" });
+                            if (!products) {
+                                return next(new ApiError("Products not found", 404));
+                            }
+                            res.status(200).json({ results: products.length, page, data: products });
+                        });

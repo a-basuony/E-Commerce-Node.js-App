@@ -11,14 +11,25 @@ const ApiError = require("../utils/apiError");
  * @access Public
  */
 exports.getProducts = asyncHandler(async (req, res, next) => {
+  // 1) filtering
+  const queryStringObj = { ...req.query };
+  const excludesFields = ["page", "sort", "limit", "fields"];
+  excludesFields.forEach((field) => delete queryStringObj[field]);
+
+  // 2) pagination
   const page = req.query.page * 1 || 1;
   const limit = req.query.limit * 1 || 5;
   const skip = (page - 1) * limit;
 
-  const products = await Product.find({})
+  // 3) Build query
+  const mongooseQuery = Product.find(queryStringObj)
     .skip(skip)
     .limit(limit)
     .populate({ path: "category", select: "name -_id" });
+
+  // 4) Execute query
+  const products = await mongooseQuery;
+
   if (!products) {
     return next(new ApiError("Products not found", 404));
   }
