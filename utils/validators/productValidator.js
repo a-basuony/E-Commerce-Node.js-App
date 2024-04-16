@@ -62,7 +62,7 @@ exports.createProductValidator = [
     .withMessage("product must be belong to a category")
     .isMongoId()
     .withMessage("Category must be a valid MongoDB ObjectId")
-    .custom((categoryId, { req }) =>
+    .custom((categoryId) =>
       Category.findById(categoryId).then((category) => {
         if (!category) {
           return Promise.reject(
@@ -73,17 +73,28 @@ exports.createProductValidator = [
     ),
   check("subcategories")
     .optional()
-    .isMongoId()
-    .withMessage("Subcategory must be a valid MongoDB ObjectId")
+    .isArray({ min: 1 })
+    .withMessage("Subcategories must be an array with at least one element")
     .custom((subcategoriesIds) =>
-      Subcategory.find({ _id: { $exist: true, $in: subcategoriesIds } }).then(
-        (result) => {
-          if (result.length < 1 || result.length !== subcategoriesIds) {
-            return Promise.reject(new Error("Invalid subcategory id format"));
-          }
+      Subcategory.find({ _id: { $in: subcategoriesIds } }).then((result) => {
+        if (result.length !== subcategoriesIds.length) {
+          return Promise.reject(new Error("Invalid subcategory id format"));
         }
-      )
-    ),
+      })
+    )
+
+    .custom(async (subcategoriesIds, { req }) => {
+      const categoryId = req.body.category;
+      const subcategories = await Subcategory.find({
+        _id: { $in: subcategoriesIds },
+        category: categoryId,
+      });
+      if (subcategories.length !== subcategoriesIds.length) {
+        return Promise.reject(
+          new Error("Subcategories do not belong to the category")
+        );
+      }
+    }),
   check("brand")
     .optional()
     .isMongoId()

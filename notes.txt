@@ -692,11 +692,11 @@
                 ----------------------------
                 2- middleware function that is used to set the category field in the request body to the categoryId from the request params
                     1=> 
-                         exports.setCategoryIdToBody = (req, res, next) => {
-                        if (!req.body.category) {
-                            req.body.category = req.params.categoryId;
-                        }
-                        next();
+                        exports.setCategoryIdToBody = (req, res, next) => {
+                            if (!req.body.category) {
+                                req.body.category = req.params.categoryId;
+                            }
+                            next();
                         };
 
                     2=> 
@@ -741,7 +741,7 @@
 
        1 => product Validator
                 = you can create a custom validator 
-                = to check if the category existence in our DB
+                => to check if the category existence in our DB
                         .custom((categoryId, { req }) =>
                             Category.findById(categoryId).then((category) => {
                                 if (!category) {
@@ -771,11 +771,11 @@
 
 
         2- in product Validator 
-            = check on subCategories id as an array of objects 
+            => check on subCategories id as an array of Ids
               to check if subCategories existence in my DB before adding product
 
                 .custom((subcategoriesIds) =>
-                            Subcategory.find({ _id: { $exist: true, $in: subcategoriesIds } }).then( (result) =>{
+                            Subcategory.find({ _id: { $in: subcategoriesIds } }).then( (result) =>{
                                 if(result.length < 1 || result.length !== subcategoriesIds){
                                 return Promise.reject(
                                     new Error("Invalid subcategory id format")
@@ -797,3 +797,14 @@
                                     }
                                 })
                             ),
+
+        2- in product Validator 
+              => check and validate Subcategories belong to Category
+                    
+
+
+
+
+
+
+                    
