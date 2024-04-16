@@ -835,6 +835,16 @@
 
 
 
+23- insert & delete products dummy data using seeder script
 
+        1- install colors package  
+                - npm install colors 
+                - used to that allows you to add colors to your console.log 
 
-                    
+                example: (" will be printed in green color in the console.)
+
+                        const colors = require('colors');
+                        
+                        console.log('Hello, world!'.green);
+                        console.log("Data Inserted".green.inverse);
+
