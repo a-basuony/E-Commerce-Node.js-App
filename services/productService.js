@@ -31,8 +31,6 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   const skip = (page - 1) * limit;
 
   // 3) Build query // to can chain methods on the query
-  let mongooseQuery = Product.find(query);
-  // 3) Build query // to can chain methods on the query
   let mongooseQuery = Product.find(query)
     .skip(skip)
     .limit(limit)
@@ -48,7 +46,7 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
     mongooseQuery = mongooseQuery.sort("-createdAt");
   }
 
-  // fields limitations
+  // 5) fields limitations
   if (req.query.fields) {
     const fields = req.query.fields.split(",").join(" ");
     mongooseQuery = mongooseQuery.select(fields);
