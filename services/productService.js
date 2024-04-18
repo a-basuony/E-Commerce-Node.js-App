@@ -31,6 +31,8 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   const skip = (page - 1) * limit;
 
   // 3) Build query // to can chain methods on the query
+  let mongooseQuery = Product.find(query);
+  // 3) Build query // to can chain methods on the query
   let mongooseQuery = Product.find(query)
     .skip(skip)
     .limit(limit)

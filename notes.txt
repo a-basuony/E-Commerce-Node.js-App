@@ -982,6 +982,7 @@
                             //Parsed query: { price: { '$lt': '50' }, ratingsAverage: { '$lt': '4' } }
 
                         5- // Build query (send query to mongoose model)
+                        5- // Build query (send query to mongoose model)
                                  const mongooseQuery = Product.find(query)
                                                                 .skip(skip)
                                                                 .limit(limit)
