@@ -1,3 +1,4 @@
+
 1- npm init --save
 2- npm install express --save  => to run server (node app.js)
 3- npm install -D nodemon => to restart the server automatically (nodemon app.js) or in  package.json add "start": "nodemon app.js" to "scripts" => (npm start) or add "dev": "nodemon app.js" to "scripts" => (npm run dev)
@@ -1094,3 +1095,80 @@
                 }else{
                     mongooseQuery = mongooseQuery.select("-__v")
                 }
+
+                example: exports.getProducts = asyncHandler(async (req, res, next) => {
+                                        // 1) filtering
+                                        const queryStringObj = { ...req.query };
+                                        const excludesFields = ["page", "sort", "limit", "fields"];
+                                        excludesFields.forEach((field) => delete queryStringObj[field]);
+
+                                        //apply filtration using [gte, gt, lte, lt]
+                                        let queryString = JSON.stringify(queryStringObj);
+                                        queryString = queryString.replace(
+                                            /\b(gte|gt|lte|lt)\b/g,
+                                            (match) => `$${match}`
+                                        );
+                                        const query = JSON.parse(queryString);
+
+                                        // we need like this { price: { $gt: '109.95' }, ratingsAverage: { $gt: '4.3' } }
+                                        // 2) pagination
+                                        const page = req.query.page * 1 || 1;
+                                        const limit = req.query.limit * 1 || 5;
+                                        const skip = (page - 1) * limit;
+
+                                        // 3) Build query // to can chain methods on the query
+                                        let mongooseQuery = Product.find(query)
+                                            .skip(skip)
+                                            .limit(limit)
+                                            .populate({ path: "category", select: "name -_id" });
+
+                                        // 4) Sorting(one or list or nothing)
+                                        if (req.query.sort) {
+                                            // convert from 'price, average' => 'price average'
+                                            // 'price, average' split(',') => ['price', 'average'] join(' ') => 'price average'
+                                            const sortBy = req.query.sort.split(",").join(" ");
+                                            mongooseQuery = mongooseQuery.sort(sortBy);
+                                        } else {
+                                            mongooseQuery = mongooseQuery.sort("-createdAt");
+                                        }
+
+                                        // 5) fields limitations
+                                        if (req.query.fields) {
+                                            const fields = req.query.fields.split(",").join(" ");
+                                            mongooseQuery = mongooseQuery.select(fields);
+                                        } else {
+                                            mongooseQuery = mongooseQuery.select("-__v");
+                                        }
+
+                                        // 4) Execute query
+                                        const products = await mongooseQuery;
+
+                                        if (!products) {
+                                            return next(new ApiError("Products not found", 404));
+                                        }
+                                        // res.status(200).json({ results: products.length, page, data: products });
+                                        res.status(200).json({
+                                            status: "success",
+                                            results: products.length,
+                                            page,
+                                            data: products,
+                                        });
+                                        });
+
+25- Searching using keyword
+
+            api => /products?keyword=apple
+
+                // Search (title, description)
+                // .$or => to search products
+                // $regex => to find
+                // $options => insensitive litter  (APPLE = apple)
+                if( req.query.keyword){
+                    const query = {}
+                    query.$or =[
+                    {title: {$regex: req.query.keyword, $options: 'i'} },
+                    {description: {$regex: req.query.keyword, $options: 'i'} },
+                    ]
+
+                    mongooseQuery = mongooseQuery.find(query)
+                }                                     

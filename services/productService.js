@@ -54,19 +54,51 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
     mongooseQuery = mongooseQuery.select("-__v");
   }
 
-  // 4) Execute query
-  const products = await mongooseQuery;
-
-  if (!products) {
-    return next(new ApiError("Products not found", 404));
+  // 6) Search (title, description)
+  try {
+    if (req.query.keyword) {
+      // const query = {
+      //   $or: [
+      //     { title: { $regex: req.query.keyword, $options: "i" } },
+      //     { description: { $regex: req.query.keyword, $options: "i" } },
+      //   ],
+      // };
+      const keywordRegex = new RegExp(req.query.keyword, "i");
+      const query = {
+        $or: [
+          { title: { $regex: keywordRegex } },
+          { description: { $regex: keywordRegex } },
+        ],
+      };
+      mongooseQuery = mongooseQuery.find(query);
+    }
+  } catch (err) {
+    return next(new ApiError("Invalid search query", 400));
   }
-  // res.status(200).json({ results: products.length, page, data: products });
-  res.status(200).json({
-    status: "success",
-    results: products.length,
-    page,
-    data: products,
-  });
+
+  // 4) Execute query
+  try {
+    const products = await mongooseQuery;
+
+    if (products.length === 0) {
+      return res.status(404).json({
+        status: "fail",
+        message: "No products found",
+      });
+    }
+    if (!products) {
+      return next(new ApiError("Products not found", 404));
+    }
+
+    res.status(200).json({
+      status: "success",
+      results: products.length,
+      page,
+      data: products,
+    });
+  } catch (err) {
+    return next(err);
+  }
 });
 
 /**
