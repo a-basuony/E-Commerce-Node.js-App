@@ -18,14 +18,11 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
 
   //apply filtration using [gte, gt, lte, lt]
   let queryString = JSON.stringify(queryStringObj);
-  console.log("Before replace:", queryString); // Add this line for logging
   queryString = queryString.replace(
     /\b(gte|gt|lte|lt)\b/g,
     (match) => `$${match}`
   );
-  console.log("After replace:", queryString); // Add this line for logging
   const query = JSON.parse(queryString);
-  console.log("Parsed query:", query); // Add this line for logging
 
   // we need like this { price: { $gt: '109.95' }, ratingsAverage: { $gt: '4.3' } }
   // 2) pagination
@@ -33,11 +30,21 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   const limit = req.query.limit * 1 || 5;
   const skip = (page - 1) * limit;
 
-  // 3) Build query
-  const mongooseQuery = Product.find(query)
+  // 3) Build query // to can chain methods on the query
+  let mongooseQuery = Product.find(query)
     .skip(skip)
     .limit(limit)
     .populate({ path: "category", select: "name -_id" });
+
+  // 4) Sorting(one or list or nothing)
+  if (req.query.sort) {
+    // convert from 'price, average' => 'price average'
+    // 'price, average' split(',') => ['price', 'average'] join(' ') => 'price average'
+    const sortBy = req.query.sort.split(",").join(" ");
+    mongooseQuery = mongooseQuery.sort(sortBy);
+  } else {
+    mongooseQuery = mongooseQuery.sort("-createdAt");
+  }
 
   // 4) Execute query
   const products = await mongooseQuery;

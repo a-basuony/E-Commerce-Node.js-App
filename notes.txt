@@ -981,8 +981,86 @@
                             console.log("Parsed query:", query);
                             //Parsed query: { price: { '$lt': '50' }, ratingsAverage: { '$lt': '4' } }
 
-                        5- // send query to mongoose model
+                        5- // Build query (send query to mongoose model)
                                  const mongooseQuery = Product.find(query)
                                                                 .skip(skip)
                                                                 .limit(limit)
                                                                 .populate({ path: "category", select: "name -_id" });
+
+
+25- Sorting Feature on products
+                1- ascending order (from lowest to highest).
+                  products/?sort=-price  (from hightest to lower in price) (-descending)
+                2- descending order (from highest to lowest).
+                  products/?sort=price (from lower to hightest in price) (+ascending)
+                3- sorts a list of products by their ratings average and price 
+                   products/?sort=-ratingsAverage,price (from hightest ratingsAverage to lower, price from lower to hightest )
+
+                3- // Sorting if sort with one property (not recommended)
+                        if( req.query.sort){
+                            const sortBy = req.query.sort.split(',')
+                            mongooseQuery = mongooseQuery.sort(req.query.sort)
+                        }
+
+                4- // Sorting for list or one or nothing(if nothing we will sort with createdAt the newest one) any property
+                     if nothing sort send we will sort with createdAt the newest one (else{})
+                     
+                    if(req.query.sort){
+                        const sortBy = req.query.sort.split(',').join(' ')
+                        mongooseQuery = mongooseQuery.sort(sortBy)
+                    }else{
+                        mongooseQuery = mongooseQuery.sort('-createdAt')
+                    }
+
+            Example: 
+                                exports.getProducts = asyncHandler(async (req, res, next) => {
+                                                    // 1) filtering
+                                                    const queryStringObj = { ...req.query };
+                                                    const excludesFields = ["page", "sort", "limit", "fields"];
+                                                    excludesFields.forEach((field) => delete queryStringObj[field]);
+
+                                                    //apply filtration using [gte, gt, lte, lt]
+                                                    let queryString = JSON.stringify(queryStringObj);
+                                                    queryString = queryString.replace(
+                                                        /\b(gte|gt|lte|lt)\b/g,
+                                                        (match) => `$${match}`
+                                                    );
+                                                    const query = JSON.parse(queryString);
+
+                                                    // we need like this { price: { $gt: '109.95' }, ratingsAverage: { $gt: '4.3' } }
+                                                    // 2) pagination
+                                                    const page = req.query.page * 1 || 1;
+                                                    const limit = req.query.limit * 1 || 5;
+                                                    const skip = (page - 1) * limit;
+
+                                                    // 3) Build query // to can chain methods on the query
+                                                    let mongooseQuery = Product.find(query)
+                                                        .skip(skip)
+                                                        .limit(limit)
+                                                        .populate({ path: "category", select: "name -_id" });
+
+                                                    // 4) Sorting(one or list or nothing)
+                                                    if (req.query.sort) {
+                                                        // convert from 'price, average' => 'price average'
+                                                        // 'price, average' split(',') => ['price', 'average'] join(' ') => 'price average'
+                                                        const sortBy = req.query.sort.split(",").join(" ");
+                                                        console.log(sortBy);
+                                                        mongooseQuery = mongooseQuery.sort(sortBy);
+                                                    } else {
+                                                        mongooseQuery = mongooseQuery.sort("-createdAt");
+                                                    }
+
+                                                    // 4) Execute query
+                                                    const products = await mongooseQuery;
+
+                                                    if (!products) {
+                                                        return next(new ApiError("Products not found", 404));
+                                                    }
+                                                    // res.status(200).json({ results: products.length, page, data: products });
+                                                    res.status(200).json({
+                                                        status: "success",
+                                                        results: products.length,
+                                                        page,
+                                                        data: products,
+                                                    });
+                                    });
