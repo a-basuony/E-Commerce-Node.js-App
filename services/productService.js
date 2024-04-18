@@ -16,13 +16,25 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   const excludesFields = ["page", "sort", "limit", "fields"];
   excludesFields.forEach((field) => delete queryStringObj[field]);
 
+  //apply filtration using [gte, gt, lte, lt]
+  let queryString = JSON.stringify(queryStringObj);
+  console.log("Before replace:", queryString); // Add this line for logging
+  queryString = queryString.replace(
+    /\b(gte|gt|lte|lt)\b/g,
+    (match) => `$${match}`
+  );
+  console.log("After replace:", queryString); // Add this line for logging
+  const query = JSON.parse(queryString);
+  console.log("Parsed query:", query); // Add this line for logging
+
+  // we need like this { price: { $gt: '109.95' }, ratingsAverage: { $gt: '4.3' } }
   // 2) pagination
   const page = req.query.page * 1 || 1;
   const limit = req.query.limit * 1 || 5;
   const skip = (page - 1) * limit;
 
   // 3) Build query
-  const mongooseQuery = Product.find(queryStringObj)
+  const mongooseQuery = Product.find(query)
     .skip(skip)
     .limit(limit)
     .populate({ path: "category", select: "name -_id" });
@@ -33,7 +45,13 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   if (!products) {
     return next(new ApiError("Products not found", 404));
   }
-  res.status(200).json({ results: products.length, page, data: products });
+  // res.status(200).json({ results: products.length, page, data: products });
+  res.status(200).json({
+    status: "success",
+    results: products.length,
+    page,
+    data: products,
+  });
 });
 
 /**

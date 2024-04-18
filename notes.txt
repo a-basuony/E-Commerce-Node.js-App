@@ -894,3 +894,95 @@
                             }
                             res.status(200).json({ results: products.length, page, data: products });
                         });
+
+
+      3- filtering 
+            1- The function first creates a copy of the query string object and removes the fields that are not needed for filtering the products. like (These excluded fields are "page", "sort", "limit", and "fields".)
+            2- Pagination: The function sets the default values for page and limit if they are not provided in the query string. It then calculates the number of documents to skip based on the current page and limit
+            3- Build query: The function creates a Mongoose query using the filtered query string object. It also sets the number of documents to skip and limit, and populates the "category" field with the corresponding category name.
+            4- Execute query: The function executes the Mongoose query and returns the results. (retrieves the products that match the query string filters.)
+            5- Error handling: If no products are found, the function throws an ApiError with a message "Products not found" and a status code of 404.
+            6- Response: If products are found, the function sends a JSON response with the number of results, the current page, and the retrieved products.
+
+            Example: 
+                    exports.getProducts = asyncHandler(async (req, res, next) => {
+                            // 1- filtering
+                            const queryStringObj = { ...req.query };
+                            const excludesFields = ["page", "sort", "limit", "fields"];
+                            excludesFields.forEach((field) => delete queryStringObj[field]);
+
+                            // 2- pagination
+                            const page = req.query.page * 1 || 1;
+                            const limit = req.query.limit * 1 || 5;
+                            const skip = (page - 1) * limit;
+
+                            // 3-Build query
+                            const mongooseQuery = Product.find(queryStringObj)
+                                .skip(skip)
+                                .limit(limit)
+                                .populate({ path: "category", select: "name -_id" });
+
+                            // 4- Execute query
+                            const products = await mongooseQuery;
+
+                            if (!products) {
+                                return next(new ApiError("Products not found", 404));
+                            }
+                            // res.status(200).json({ results: products.length, page, data: products });
+                            res.status(200).json({
+                                status: "success",
+                                results: results.length,
+                                page,
+                                data: products,
+                            });
+                            });
+
+
+    => filtering with    (gte, gt, lte, lt)
+                   
+                            (greater than or equal to [gte])
+                            (greater that [gt])
+                            (less than or equal to [lte])
+                            ( less that [lt])
+
+            1- first in api we write that :
+
+                        localhost:3000/api/v1/products?price[gte]=50&ratingsAverage[gte]=4
+                        localhost:3000/api/v1/products?price[gt]=50&ratingsAverage[gt]=4
+                        localhost:3000/api/v1/products?price[lte]=50&ratingsAverage[lte]=4
+                        localhost:3000/api/v1/products?price[lt]=50&ratingsAverage[lt]=4
+
+            2- second 
+                    req   
+                        => // { price: { gt: '109.95' }, ratingsAverage: { gt: '4.3' } }
+                    we need to be like this for mongoose (to understand this is filtration) 
+                        =>  //  { price: { $gt: '109.95' }, ratingsAverage: { $gt: '4.3' } }
+
+                        1- filtering form other words that used in pagination and sort
+                            const queryStringObj = { ...req.query };
+                            const excludesFields = ["page", "sort", "limit", "fields"];
+                            excludesFields.forEach((field) => delete queryStringObj[field]);
+
+                        2-  //convert to string
+                            let queryString = JSON.stringify(queryStringObj);
+                            console.log("Before replace:", queryString); // Add this line for logging to see what happen
+                            // Before replace: {"price":{"lte":"50"},"ratingsAverage":{"lte":"4"}}
+
+                        3-  // use regex to add $ before (gte|ge|lte|lt) to understand mongo the query
+                            queryString = queryString.replace(
+                                                        /\b(gte|gt|lte|lt)\b/g,
+                                                        (match) => `$${match}`
+                                                    );
+                            console.log("After replace:", queryString);
+                            //After replace: {"price":{"$lte":"50"},"ratingsAverage":{"$lte":"4"}}
+
+                        4- // to convert string to a js object
+                            const query = JSON.parse(queryString);
+                            console.log("Parsed query:", query);
+                            //Parsed query: { price: { '$lt': '50' }, ratingsAverage: { '$lt': '4' } }
+
+                        5- // send query to mongoose model
+                                 const mongooseQuery = Product.find(query)
+                                                                .skip(skip)
+                                                                .limit(limit)
+                                                                .populate({ path: "category", select: "name -_id" });
