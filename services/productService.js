@@ -10,8 +10,10 @@ const ApiFeatures = require("../utils/apiFeatures");
  * @access Public
  */
 exports.getProducts = asyncHandler(async (req, res, next) => {
+  const countOfDocuments = await Product.countDocuments();
+
   const apiFeatures = new ApiFeatures(Product.find(), req.query)
-    .paginate()
+    .paginate(countOfDocuments)
     .filter()
     .search()
     .limitFields()
@@ -19,7 +21,8 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   // .populate({ path: "category", select: "" });
 
   try {
-    const products = await apiFeatures.mongooseQuery;
+    const { mongooseQuery, pagination } = apiFeatures;
+    const products = await mongooseQuery;
 
     if (!products || products.length === 0) {
       return res.status(404).json({
@@ -30,7 +33,7 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      // page,
+      pagination,
       results: products.length,
       data: products,
     });

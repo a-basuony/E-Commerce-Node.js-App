@@ -87,11 +87,44 @@ class ApiFeatures {
     return this;
   }
 
-  paginate() {
+  paginate(countOfDocuments) {
     // 2) pagination
     const page = this.queryString.page * 1 || 1;
     const limit = this.queryString.limit * 1 || 5;
-    const skip = (page - 1) * limit;
+    const skip = (page - 1) * limit; // 3 * 5 => 15 skip
+    const endIndex = page * limit; // end index of the current page
+
+    const pagination = {};
+    pagination.currentPage = page;
+    pagination.limit = limit;
+
+    pagination.numberOfPages = countOfDocuments / limit; // 50/10 => 5 pages
+    pagination.countOfDocuments = countOfDocuments;
+
+    if (endIndex < countOfDocuments) {
+      pagination.next = page + 1;
+    }
+    if (skip > 0) {
+      pagination.prev = page - 1;
+    }
+
+    this.pagination = pagination;
+
+    //  page=1   "pagination": {
+    //                      "currentPage": 1,
+    //                        "limit": 5,
+    //                        "numberOfPages": 2,
+    //                        "countOfDocuments": 10,
+    //                        "next": 2
+    //                },
+
+    //  page=2  "pagination": {
+    //                  "currentPage": 2,
+    //                  "limit": 5,
+    //                  "numberOfPages": 2,
+    //                  "countOfDocuments": 10,
+    //                  "prev": 1
+    //                },
 
     this.mongooseQuery = this.mongooseQuery.skip(skip).limit(limit);
     return this;
