@@ -31,7 +31,8 @@ class ApiFeatures {
     if (this.queryString.sort) {
       // convert from 'price, average' => 'price average' => remove (,)
       // 'price, average' split(',') => ['price', 'average'] join(' ') => 'price average'
-      const sortBy = req.query.sort.split(",").join(" ");
+      const sortBy = this.queryString.sort.split(",").join(" ");
+      console.log("sorted by" + sortBy);
       this.mongooseQuery = this.mongooseQuery.sort(sortBy);
     } else {
       this.mongooseQuery = this.mongooseQuery.sort("-createdAt"); // sort by createdAt in descending order
@@ -52,14 +53,30 @@ class ApiFeatures {
   }
 
   search() {
-    // 6) Search in (title, description)
+    // Search in (title, description)
+    // try {
+    //   if (this.queryString.keyword) {
+    //     const keywordRegex = new RegExp(this.queryString.keyword, "i");
+    //     const query = {
+    //       $or: [
+    //         { title: { $regex: keywordRegex } },
+    //         { description: { $regex: keywordRegex } },
+    //       ],
+    //     };
+    //     this.mongooseQuery = this.mongooseQuery.find(query);
+    //   }
+    // } catch (err) {
+    //   return next(new ApiError("Invalid search query", 400));
+    // }
+
     try {
       if (this.queryString.keyword) {
-        const keywordRegex = new RegExp(this.queryString.keyword, "i");
+        const keyword = this.queryString.keyword;
         const query = {
+          $text: { $search: keyword },
           $or: [
-            { title: { $regex: keywordRegex } },
-            { description: { $regex: keywordRegex } },
+            { title: { $regex: new RegExp(keyword, "i") } },
+            { description: { $regex: new RegExp(keyword, "i") } },
           ],
         };
         this.mongooseQuery = this.mongooseQuery.find(query);
@@ -77,6 +94,10 @@ class ApiFeatures {
     const skip = (page - 1) * limit;
 
     this.mongooseQuery = this.mongooseQuery.skip(skip).limit(limit);
+    return this;
+  }
+  populate(options) {
+    this.mongooseQuery = this.mongooseQuery.populate(options);
     return this;
   }
 }
