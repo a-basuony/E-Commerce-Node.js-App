@@ -52,38 +52,23 @@ class ApiFeatures {
     return this;
   }
 
-  search() {
-    // Search in (title, description)
-    // try {
-    //   if (this.queryString.keyword) {
-    //     const keywordRegex = new RegExp(this.queryString.keyword, "i");
-    //     const query = {
-    //       $or: [
-    //         { title: { $regex: keywordRegex } },
-    //         { description: { $regex: keywordRegex } },
-    //       ],
-    //     };
-    //     this.mongooseQuery = this.mongooseQuery.find(query);
-    //   }
-    // } catch (err) {
-    //   return next(new ApiError("Invalid search query", 400));
-    // }
-
+  search(modelName) {
+    // Search in (title, description) or name
+    let query = {};
     try {
-      if (this.queryString.keyword) {
-        const keyword = this.queryString.keyword;
-        const query = {
-          $text: { $search: keyword },
-          $or: [
-            { title: { $regex: new RegExp(keyword, "i") } },
-            { description: { $regex: new RegExp(keyword, "i") } },
-          ],
-        };
-        this.mongooseQuery = this.mongooseQuery.find(query);
+      if (modelName === "Products") {
+        query.$or = [
+          { title: { $regex: this.queryString.keyword, $options: "i" } },
+          { description: { $regex: this.queryString.keyword, $options: "i" } },
+        ];
+      } else {
+        query = { name: { $regex: this.queryString.keyword, $options: "i" } };
       }
+      this.mongooseQuery = this.mongooseQuery.find(query);
     } catch (err) {
       return next(new ApiError("Invalid search query", 400));
     }
+
     return this;
   }
 
@@ -109,22 +94,6 @@ class ApiFeatures {
     }
 
     this.pagination = pagination;
-
-    //  page=1   "pagination": {
-    //                      "currentPage": 1,
-    //                        "limit": 5,
-    //                        "numberOfPages": 2,
-    //                        "countOfDocuments": 10,
-    //                        "next": 2
-    //                },
-
-    //  page=2  "pagination": {
-    //                  "currentPage": 2,
-    //                  "limit": 5,
-    //                  "numberOfPages": 2,
-    //                  "countOfDocuments": 10,
-    //                  "prev": 1
-    //                },
 
     this.mongooseQuery = this.mongooseQuery.skip(skip).limit(limit);
     return this;
