@@ -23,58 +23,58 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
     (match) => `$${match}`
   );
   const query = JSON.parse(queryString);
-
   // we need like this { price: { $gt: '109.95' }, ratingsAverage: { $gt: '4.3' } }
-  // 2) pagination
-  const page = req.query.page * 1 || 1;
-  const limit = req.query.limit * 1 || 5;
-  const skip = (page - 1) * limit;
+
+  // // 2) pagination
+  // const page = req.query.page * 1 || 1;
+  // const limit = req.query.limit * 1 || 5;
+  // const skip = (page - 1) * limit;
 
   // 3) Build query // to can chain methods on the query
   let mongooseQuery = Product.find(query)
-    .skip(skip)
-    .limit(limit)
+    // .skip(skip)
+    // .limit(limit)
     .populate({ path: "category", select: "name -_id" });
 
-  // 4) Sorting(one or list or nothing)
-  if (req.query.sort) {
-    // convert from 'price, average' => 'price average'
-    // 'price, average' split(',') => ['price', 'average'] join(' ') => 'price average'
-    const sortBy = req.query.sort.split(",").join(" ");
-    mongooseQuery = mongooseQuery.sort(sortBy);
-  } else {
-    mongooseQuery = mongooseQuery.sort("-createdAt");
-  }
+  // // 4) Sorting(one or list or nothing)
+  // if (req.query.sort) {
+  //   // convert from 'price, average' => 'price average' => remove (,)
+  //   // 'price, average' split(',') => ['price', 'average'] join(' ') => 'price average'=> for mongoose query
+  //   const sortBy = req.query.sort.split(",").join(" ");
+  //   mongooseQuery = mongooseQuery.sort(sortBy);
+  // } else {
+  //   mongooseQuery = mongooseQuery.sort("-createdAt"); // sort by createdAt in descending order
+  // }
 
-  // 5) fields limitations
-  if (req.query.fields) {
-    const fields = req.query.fields.split(",").join(" ");
-    mongooseQuery = mongooseQuery.select(fields);
-  } else {
-    mongooseQuery = mongooseQuery.select("-__v");
-  }
+  // // 5) fields limitations
+  // if (req.query.fields) {
+  //   const fields = req.query.fields.split(",").join(" ");
+  //   mongooseQuery = mongooseQuery.select(fields);
+  // } else {
+  //   mongooseQuery = mongooseQuery.select("-__v"); // remove __v
+  // }
 
-  // 6) Search (title, description)
-  try {
-    if (req.query.keyword) {
-      // const query = {
-      //   $or: [
-      //     { title: { $regex: req.query.keyword, $options: "i" } },
-      //     { description: { $regex: req.query.keyword, $options: "i" } },
-      //   ],
-      // };
-      const keywordRegex = new RegExp(req.query.keyword, "i");
-      const query = {
-        $or: [
-          { title: { $regex: keywordRegex } },
-          { description: { $regex: keywordRegex } },
-        ],
-      };
-      mongooseQuery = mongooseQuery.find(query);
-    }
-  } catch (err) {
-    return next(new ApiError("Invalid search query", 400));
-  }
+  // // 6) Search in (title, description)
+  // try {
+  //   if (req.query.keyword) {
+  //     // const query = {
+  //     //   $or: [
+  //     //     { title: { $regex: req.query.keyword, $options: "i" } },
+  //     //     { description: { $regex: req.query.keyword, $options: "i" } },
+  //     //   ],
+  //     // };
+  //     const keywordRegex = new RegExp(req.query.keyword, "i");
+  //     const query = {
+  //       $or: [
+  //         { title: { $regex: keywordRegex } },
+  //         { description: { $regex: keywordRegex } },
+  //       ],
+  //     };
+  //     mongooseQuery = mongooseQuery.find(query);
+  //   }
+  // } catch (err) {
+  //   return next(new ApiError("Invalid search query", 400));
+  // }
 
   // 4) Execute query
   try {

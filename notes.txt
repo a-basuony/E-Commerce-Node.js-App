@@ -970,6 +970,7 @@
                             // Before replace: {"price":{"lte":"50"},"ratingsAverage":{"lte":"4"}}
 
                         3-  // use regex to add $ before (gte|ge|lte|lt) to understand mongo the query
+                            MongoDB query operators ($gte, $gt, $lte, and $lt)
                             queryString = queryString.replace(
                                                         /\b(gte|gt|lte|lt)\b/g,
                                                         (match) => `$${match}`
@@ -1172,3 +1173,6 @@
 
                     mongooseQuery = mongooseQuery.find(query)
                 }                                     
+
+
+
