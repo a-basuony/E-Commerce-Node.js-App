@@ -4,6 +4,7 @@ const asyncHandler = require("express-async-handler");
 const SubCategory = require("../models/subCategoryModel");
 const ApiError = require("../utils/apiError");
 const ApiFeatures = require("../utils/apiFeatures");
+const factory = require("./handlersFactory");
 
 // middleware used to create an object (filterObject) based on categoryId from req.params
 //  it sets the category field in the filterObject to the categoryId
@@ -97,33 +98,35 @@ exports.createSubCategory = asyncHandler(async (req, res) => {
  * @route PUT /api/subcategories/:id
  * @access Private
  */
-exports.updateSubCategory = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const { name, category } = req.body;
-  const subCategory = await SubCategory.findOneAndUpdate(
-    { _id: id }, // find the document with this ID
-    { name, slug: slugify(name), category }, // update it with new values,
-    { new: true } // and then return the updated document
-  );
+exports.updateSubCategory = factory.updateOne(SubCategory);
 
-  if (!subCategory) {
-    return next(
-      new ApiError(`Couldn't find this subCategory with this id ${id}`, 404)
-    );
-  }
-  res.status(200).json({ data: subCategory });
-});
+// exports.updateSubCategory = asyncHandler(async (req, res, next) => {
+//   const subCategory = await SubCategory.findByIdAndUpdate(
+//     req.params.id,
+//     req.body,
+//     { new: true } // and then return the updated document
+//   );
+
+//   if (!subCategory) {
+//     return next(
+//       new ApiError(`Couldn't find this subCategory with this id ${id}`, 404)
+//     );
+//   }
+//   res.status(200).json({ data: subCategory });
+// });
 
 /**
  * @desc     Delete subCategory with id
  * @route    DELETE  api/v1/subcategories/:id
  * @access   Private
  */
-exports.deleteSubCategory = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const subCategory = await SubCategory.findByIdAndDelete(id);
-  if (!subCategory) {
-    return next(new ApiError("SubCategory not found", 404));
-  }
-  res.status(204).send();
-});
+exports.deleteSubCategory = factory.deleteOne(SubCategory);
+
+// exports.deleteSubCategory = asyncHandler(async (req, res, next) => {
+//   const { id } = req.params;
+//   const subCategory = await SubCategory.findByIdAndDelete(id);
+//   if (!subCategory) {
+//     return next(new ApiError("SubCategory not found", 404));
+//   }
+//   res.status(204).send();
+// });

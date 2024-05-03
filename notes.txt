@@ -1534,4 +1534,18 @@
 
 
 29- apply these features of apiFeatures for all Models (brandService, categoryService, subCategoryService, productService)
+30- create a file apiFeatures.js as a class for all methods (filter, sort, pagination, search , limitFields)  and use it in all controllers(services)
 
+
+31- findOneAndUpdate(  
+        { _id: id }, 
+        { name, slug: slugify(name), category }, // update it with new values,
+        { new: true }
+    )
+
+    instead => 
+                    findOneAndUpdate(
+                        req.params.id, 
+                        req.body,
+                        {new: true}
+                    )

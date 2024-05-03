@@ -3,6 +3,7 @@ const asyncHandler = require("express-async-handler");
 const Product = require("../models/productModel");
 const ApiError = require("../utils/apiError");
 const ApiFeatures = require("../utils/apiFeatures");
+const factory = require("./handlersFactory");
 
 /**
  * @desc  Get all products
@@ -105,13 +106,15 @@ exports.updateProduct = asyncHandler(async (req, res, next) => {
  * @route    DELETE /api/v1/products/:id
  * @access   Private
  */
-exports.deleteProduct = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const product = await Product.findByIdAndDelete(id);
-  if (!product) {
-    return next(
-      new ApiError(`failed to delete product for this id: ${id}`, 404)
-    );
-  }
-  res.status(200).json({ message: "Deleted product successfully" });
-});
+exports.deleteProduct = factory.deleteOne(Product);
+
+// exports.deleteProduct = asyncHandler(async (req, res, next) => {
+//   const { id } = req.params;
+//   const product = await Product.findByIdAndDelete(id);
+//   if (!product) {
+//     return next(
+//       new ApiError(`failed to delete product for this id: ${id}`, 404)
+//     );
+//   }
+//   res.status(200).json({ message: "Deleted product successfully" });
+// });
