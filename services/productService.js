@@ -21,7 +21,7 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
   // .populate({ path: "category", select: "" });
 
   try {
-    const { mongooseQuery, pagination } = apiFeatures;
+    const { mongooseQuery, paginationResult } = apiFeatures;
     const products = await mongooseQuery;
 
     if (!products || products.length === 0) {
@@ -33,7 +33,7 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      pagination,
+      paginationResult,
       results: products.length,
       data: products,
     });

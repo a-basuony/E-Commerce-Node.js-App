@@ -1,3 +1,5 @@
+const ApiError = require("./apiError");
+
 class ApiFeatures {
   constructor(mongooseQuery, queryString) {
     this.mongooseQuery = mongooseQuery;
@@ -54,19 +56,24 @@ class ApiFeatures {
 
   search(modelName) {
     // Search in (title, description) or name
-    let query = {};
-    try {
+    if (this.queryString.keyword) {
+      let query = {};
+
+      const keyword = this.queryString.keyword;
+      if (!keyword || typeof keyword !== "string") {
+        // Handle the case where keyword is not defined or not a string
+        throw new ApiError("Invalid search keyword", 400);
+      }
+
       if (modelName === "Products") {
         query.$or = [
-          { title: { $regex: this.queryString.keyword, $options: "i" } },
-          { description: { $regex: this.queryString.keyword, $options: "i" } },
+          { title: { $regex: keyword, $options: "i" } },
+          { description: { $regex: keyword, $options: "i" } },
         ];
       } else {
-        query = { name: { $regex: this.queryString.keyword, $options: "i" } };
+        query = { name: { $regex: keyword, $options: "i" } };
       }
       this.mongooseQuery = this.mongooseQuery.find(query);
-    } catch (err) {
-      return next(new ApiError("Invalid search query", 400));
     }
 
     return this;
@@ -83,7 +90,7 @@ class ApiFeatures {
     pagination.currentPage = page;
     pagination.limit = limit;
 
-    pagination.numberOfPages = countOfDocuments / limit; // 50/10 => 5 pages
+    pagination.numberOfPages = Math.ceil(countOfDocuments / limit); // 50/10 => 5 pages
     pagination.countOfDocuments = countOfDocuments;
 
     if (endIndex < countOfDocuments) {
@@ -93,7 +100,7 @@ class ApiFeatures {
       pagination.prev = page - 1;
     }
 
-    this.pagination = pagination;
+    this.paginationResult = pagination;
 
     this.mongooseQuery = this.mongooseQuery.skip(skip).limit(limit);
     return this;

@@ -3,19 +3,29 @@ const asyncHandler = require("express-async-handler");
 
 const Category = require("../models/categoryModel");
 const ApiError = require("../utils/apiError");
+const ApiFeatures = require("../utils/apiFeatures");
 /**
 // @desc     Get all categories
 // @route    GET /api/v1/categories
 // @access   Public
 */
-const getCategories = asyncHandler(async (req, res) => {
-  const page = req.query.page * 1 || 1;
-  const limit = req.query.limit * 1 || 5;
-  const skip = (page - 1) * limit; /// ex: (2-1)*5=5
+const getCategories = asyncHandler(async (req, res, next) => {
+  //Build Query
+  const documentsCount = await Category.countDocuments();
+  const apiFeatures = new ApiFeatures(Category.find({}), req.query)
+    .filter()
+    .sort()
+    // .search()
+    .limitFields()
+    .paginate(documentsCount);
 
-  // console.log(page, limit, skip);
-  const categories = await Category.find({}).skip(skip).limit(limit);
-  res.status(200).json({ results: categories.length, page, data: categories });
+  // Execute query
+  const { mongooseQuery, paginationResult } = apiFeatures;
+  const categories = await mongooseQuery;
+
+  res
+    .status(200)
+    .json({ results: categories.length, paginationResult, data: categories });
 });
 
 /**

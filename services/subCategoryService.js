@@ -3,6 +3,7 @@ const asyncHandler = require("express-async-handler");
 
 const SubCategory = require("../models/subCategoryModel");
 const ApiError = require("../utils/apiError");
+const ApiFeatures = require("../utils/apiFeatures");
 
 // middleware used to create an object (filterObject) based on categoryId from req.params
 //  it sets the category field in the filterObject to the categoryId
@@ -24,28 +25,28 @@ exports.createFilterObj = (req, res, next) => {
  * @access   Public
  */
 exports.getSubCategories = asyncHandler(async (req, res, next) => {
-  const page = req.query.page || 1;
-  const limit = req.query.limit || 5;
-  const skip = (page - 1) * limit;
-  // console.log("Filter Object:", filterObject);
-  const subCategory = await SubCategory.find(req.filterObj)
-    .skip(skip)
-    .limit(limit)
-    .populate({ path: "category", select: "name" })
-    .catch((err) => {
-      console.error("Error fetching subcategories:", err);
-      return next(new ApiError("Failed to get Subcategories", 500));
-    });
+  //Build Query
+  const documentsCount = await SubCategory.countDocuments();
+  const apiFeatures = new ApiFeatures(SubCategory.find({}), req.query)
+    .filter()
+    .sort()
+    // .search("subCategory", next)
+    .search()
+    .limitFields()
+    .paginate(documentsCount);
 
-  // -_id;
-  // is used to fetch and include data from another collection related to the current one, and specify which fields from the related documents should be included in the response.
-  //This populates the "category" field in the subcategory documents, selecting only the "name" field and excluding the "_id" field from the related category documents.
-  if (!subCategory) {
+  // Execute query
+  const { mongooseQuery, paginationResult } = apiFeatures;
+  const subCategories = await mongooseQuery;
+
+  if (!subCategories) {
     return next(new ApiError("Failed to get Subcategories", 400));
   }
-  res
-    .status(200)
-    .json({ results: subCategory.length, page, data: subCategory });
+  res.status(200).json({
+    results: subCategories.length,
+    paginationResult,
+    data: subCategories,
+  });
 });
 
 /**
