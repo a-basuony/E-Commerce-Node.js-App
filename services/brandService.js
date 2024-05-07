@@ -70,20 +70,22 @@ exports.getSpecificBrand = asyncHandler(async (req, res, next) => {
  * @route PUT /api/v1/brands
  * @access Private
  */
-exports.updateBrand = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const { name } = req.body;
+exports.updateBrand = factory.updateOne(Brand);
 
-  const brand = await Brand.findByIdAndUpdate(
-    { _id: id },
-    { name, slug: slugify(name) },
-    { new: true }
-  );
-  if (!brand) {
-    return next(new ApiError(`brand not found for this id ${id}`, 404));
-  }
-  res.status(200).json({ data: brand });
-});
+// exports.updateBrand = asyncHandler(async (req, res, next) => {
+//   const { id } = req.params;
+//   const { name } = req.body;
+
+//   const brand = await Brand.findByIdAndUpdate(
+//     { _id: id },
+//     { name, slug: slugify(name) },
+//     { new: true }
+//   );
+//   if (!brand) {
+//     return next(new ApiError(`brand not found for this id ${id}`, 404));
+//   }
+//   res.status(200).json({ data: brand });
+// });
 
 /**
  * @desc Delete a specific brand

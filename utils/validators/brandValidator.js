@@ -1,5 +1,6 @@
 const { check } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
+const slugify = require("slugify");
 
 exports.createBrandValidator = [
   check("name")
@@ -25,7 +26,11 @@ exports.updateBrandValidator = [
     .isLength({ min: 2 })
     .withMessage("name must be at least 2 validator")
     .isLength({ max: 32 })
-    .withMessage("name must be at least 32 validator"),
+    .withMessage("name must be at least 32 validator")
+    .custom((val, { req }) => {
+      req.body.slug = slugify(val);
+      return true;
+    }),
   validatorMiddleware,
 ];
 
