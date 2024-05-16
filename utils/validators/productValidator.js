@@ -2,6 +2,8 @@ const { check, param, body } = require("express-validator");
 const validatorMiddleware = require("../../middlewares/validatorMiddleware");
 const Category = require("../../models/categoryModel");
 const Subcategory = require("../../models/subCategoryModel");
+const { trusted } = require("mongoose");
+const slugify = require("slugify");
 
 exports.createProductValidator = [
   check("title")
@@ -136,12 +138,15 @@ exports.updateProductValidator = [
     .optional()
     .isString()
     .isLength({ min: 2, max: 100 })
+    .withMessage("Product title must be between 2 and 100 characters")
     .trim()
-    .withMessage("Product title must be between 2 and 100 characters"),
+    .custom((val, { req }) => {
+      req.body.slug = slugify(val);
+      return true;
+    }),
   body("slug")
     .optional()
     .isString()
-    .isLowercase()
     .withMessage("Slug must be a lowercase string"),
   body("description")
     .optional()

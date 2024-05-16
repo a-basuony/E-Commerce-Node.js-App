@@ -30,7 +30,10 @@ exports.updateOne = (Model) =>
 
     if (!document) {
       return next(
-        new ApiError(`Couldn't find this document with this id ${id}`, 404)
+        new ApiError(
+          `Couldn't find this document with this id ${req.params.id}`,
+          404
+        )
       );
     }
     res.status(200).json({ data: document });

@@ -62,20 +62,22 @@ const createCategory = asyncHandler(async (req, res) => {
 // @desc   Update specific category name by id
 // @route  PUT /api/v1/categories/:id
 // @access  Private     //=> Only the owner can update a category
-const updateCategory = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const { name } = req.body;
-  const category = await Category.findOneAndUpdate(
-    { _id: id }, // find the document with this ID
-    { name, slug: slugify(name) }, // update it with new values,
-    { new: true } // and then return the updated document
-  );
-  if (!category) {
-    // res.status(404).json({ message: `No category for this id ${id}` });
-    return next(new ApiError(`No category for this id ${id}`, 404));
-  }
-  res.status(200).json({ data: category });
-});
+const updateCategory = factory.updateOne(Category);
+
+// const updateCategory = asyncHandler(async (req, res, next) => {
+//   const { id } = req.params;
+//   const { name } = req.body;
+//   const category = await Category.findOneAndUpdate(
+//     { _id: id }, // find the document with this ID
+//     { name, slug: slugify(name) }, // update it with new values,
+//     { new: true } // and then return the updated document
+//   );
+//   if (!category) {
+//     // res.status(404).json({ message: `No category for this id ${id}` });
+//     return next(new ApiError(`No category for this id ${id}`, 404));
+//   }
+//   res.status(200).json({ data: category });
+// });
 
 //  @desc Delete a category from database by its id
 //  @route DELETE /api/v1/categories/:id

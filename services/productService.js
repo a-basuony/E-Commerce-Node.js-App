@@ -81,25 +81,28 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
  * @route PUT /api/v1/products/:id
  * @access Private
  */
-exports.updateProduct = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  if (req.body.title) {
-    req.body.slug = slugify(req.body.title);
-  }
 
-  const product = await Product.findByIdAndUpdate({ _id: id }, req.body, {
-    new: true,
-  }).populate({
-    path: "category",
-    select: "name",
-  });
-  if (!product) {
-    return next(
-      new ApiError(`failed to update product for this id: ${id}`, 400)
-    );
-  }
-  res.status(200).json({ data: product });
-});
+exports.updateProduct = factory.updateOne(Product);
+
+// exports.updateProduct = asyncHandler(async (req, res, next) => {
+//   const { id } = req.params;
+//   if (req.body.title) {
+//     req.body.slug = slugify(req.body.title);
+//   }
+
+//   const product = await Product.findByIdAndUpdate({ _id: id }, req.body, {
+//     new: true,
+//   }).populate({
+//     path: "category",
+//     select: "name",
+//   });
+//   if (!product) {
+//     return next(
+//       new ApiError(`failed to update product for this id: ${id}`, 400)
+//     );
+//   }
+//   res.status(200).json({ data: product });
+// });
 
 /**
  * @desc     Delete a product
