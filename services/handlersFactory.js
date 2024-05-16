@@ -5,6 +5,18 @@ const ApiError = require("../utils/apiError");
 const ApiFeatures = require("../utils/apiFeatures");
 const { Model } = require("mongoose");
 
+exports.getOne = (Model) => {
+  return asyncHandler(async (req, res, next) => {
+    const { id } = req.params;
+
+    const document = await Model.findById(id);
+    if (!document) {
+      return next(new ApiError(`Not found for this id: ${id}`, 404));
+    }
+    res.status(200).json({ data: document });
+  });
+};
+
 // exports.deleteProduct = asyncHandler(async (req, res, next) => {
 //   const { id } = req.params;
 //   const product = await Product.findByIdAndDelete(id);

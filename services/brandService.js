@@ -42,15 +42,17 @@ exports.createBrand = factory.createOne(Brand);
  * @route  GET /api/v1/brands/:id
  * @access Public
  */
-exports.getSpecificBrand = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
+exports.getSpecificBrand = factory.getOne(Brand);
 
-  const brand = await Brand.findById(id);
-  if (!brand) {
-    return next(new ApiError(`Not found for this id: ${id}`, 404));
-  }
-  res.status(200).json({ data: brand });
-});
+// exports.getSpecificBrand = asyncHandler(async (req, res, next) => {
+//   const { id } = req.params;
+
+//   const brand = await Brand.findById(id);
+//   if (!brand) {
+//     return next(new ApiError(`Not found for this id: ${id}`, 404));
+//   }
+//   res.status(200).json({ data: brand });
+// });
 
 /**
  * @desc  Update a brand

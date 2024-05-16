@@ -45,21 +45,23 @@ exports.getProducts = asyncHandler(async (req, res, next) => {
 });
 
 /**
- * @desc  Get single product
+ * @desc  Get specific product
  * @route GET /api/v1/products/:id
  * @access Public
  */
-exports.getProduct = asyncHandler(async (req, res, next) => {
-  const { id } = req.params;
-  const product = await Product.findById(id).populate({
-    path: "category",
-    select: "name",
-  });
-  if (!product) {
-    return next(new ApiError(`there is no product for this id: ${id}`, 404));
-  }
-  res.status(200).json({ data: product });
-});
+exports.getProduct = factory.getOne(Product);
+
+// exports.getProduct = asyncHandler(async (req, res, next) => {
+//   const { id } = req.params;
+//   const product = await Product.findById(id).populate({
+//     path: "category",
+//     select: "name",
+//   });
+//   if (!product) {
+//     return next(new ApiError(`there is no product for this id: ${id}`, 404));
+//   }
+//   res.status(200).json({ data: product });
+// });
 
 /**
  * @desc   Create a new product
