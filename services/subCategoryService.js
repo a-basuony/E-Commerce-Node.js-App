@@ -1,14 +1,9 @@
-const slugify = require("slugify");
-const asyncHandler = require("express-async-handler");
-
 const SubCategory = require("../models/subCategoryModel");
-const ApiError = require("../utils/apiError");
-const ApiFeatures = require("../utils/apiFeatures");
 const factory = require("./handlersFactory");
 
-// middleware used to create an object (filterObject) based on categoryId from req.params
-//  it sets the category field in the filterObject to the categoryId
-// Then, it assigns the filterObject to the req.filterObj property
+// nested route
+// * GEt /api/v1/categories/:categoryId/subcategories
+// set req.params.categoryId to the req
 exports.createFilterObj = (req, res, next) => {
   let filterObject = {};
   if (req.params.categoryId) {
@@ -25,30 +20,36 @@ exports.createFilterObj = (req, res, next) => {
  * @route    GET /api/v1/Subcategories
  * @access   Public
  */
-exports.getSubCategories = asyncHandler(async (req, res, next) => {
-  //Build Query
-  const documentsCount = await SubCategory.countDocuments();
-  const apiFeatures = new ApiFeatures(SubCategory.find({}), req.query)
-    .filter()
-    .sort()
-    // .search("subCategory", next)
-    .search()
-    .limitFields()
-    .paginate(documentsCount);
 
-  // Execute query
-  const { mongooseQuery, paginationResult } = apiFeatures;
-  const subCategories = await mongooseQuery;
+exports.getSubCategories = factory.getAll(SubCategory);
 
-  if (!subCategories) {
-    return next(new ApiError("Failed to get Subcategories", 400));
-  }
-  res.status(200).json({
-    results: subCategories.length,
-    paginationResult,
-    data: subCategories,
-  });
-});
+// exports.getSubCategories = asyncHandler(async (req, res, next) => {
+//   //Build Query
+//   const documentsCount = await SubCategory.countDocuments();
+//   const apiFeatures = new ApiFeatures(
+//     SubCategory.find(req.filterObj),
+//     req.query
+//   )
+//     .filter()
+//     .sort()
+//     // .search("subCategory", next)
+//     .search()
+//     .limitFields()
+//     .paginate(documentsCount);
+
+//   // Execute query
+//   const { mongooseQuery, paginationResult } = apiFeatures;
+//   const subCategories = await mongooseQuery;
+
+//   if (!subCategories) {
+//     return next(new ApiError("Failed to get Subcategories", 400));
+//   }
+//   res.status(200).json({
+//     results: subCategories.length,
+//     paginationResult,
+//     data: subCategories,
+//   });
+// });
 
 /**
  * @desc     Get specific SubCategory by id
@@ -57,25 +58,13 @@ exports.getSubCategories = asyncHandler(async (req, res, next) => {
  */
 exports.getSpecificSubCategory = factory.getOne(SubCategory);
 
-// exports.getSpecificSubCategory = asyncHandler(async (req, res, next) => {
-//   const { id } = req.params;
-//   const subCategory = await SubCategory.findById(id).populate({
-//     path: "category",
-//     select: "name",
-//   });
-//   if (!subCategory) {
-//     next(new ApiError(`No subCategory for this this id: ${id}`, 404));
-//   }
-//   res.status(200).json({ data: subCategory });
-// });
-
-// middleware function that is used to set the category field in the request body to the categoryId from the request params
 exports.setCategoryIdToBody = (req, res, next) => {
   if (!req.body.category) {
     req.body.category = req.params.categoryId;
   }
   next();
 };
+
 /**
  * @desc     Create SubCategory
  * @route    POST /api/v1/Subcategories

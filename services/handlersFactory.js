@@ -1,9 +1,37 @@
 const asyncHandler = require("express-async-handler");
-const slugify = require("slugify");
 
 const ApiError = require("../utils/apiError");
 const ApiFeatures = require("../utils/apiFeatures");
-const { Model } = require("mongoose");
+
+exports.getAll = (Model) => {
+  return asyncHandler(async (req, res, next) => {
+    let filter = {};
+    if (req.filterObj) {
+      filter = req.filterObj;
+    }
+    //Build Query
+    const documentsCount = await Model.countDocuments();
+    const apiFeatures = new ApiFeatures(Model.find(filter), req.query)
+      .filter()
+      .sort()
+      .search()
+      .limitFields()
+      .paginate(documentsCount);
+
+    // Execute query
+    const { mongooseQuery, paginationResult } = apiFeatures;
+    const documents = await mongooseQuery;
+
+    if (!documents) {
+      return next(new ApiError("Failed to get documents", 400));
+    }
+    res.status(200).json({
+      results: documents.length,
+      paginationResult,
+      data: documents,
+    });
+  });
+};
 
 exports.getOne = (Model) => {
   return asyncHandler(async (req, res, next) => {
