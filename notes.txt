@@ -1543,9 +1543,29 @@
         { new: true }
     )
 
-    instead => 
-                    findOneAndUpdate(
-                        req.params.id, 
-                        req.body,
-                        {new: true}
-                    )
+    instead of  alternative solutions for slugify
+        1.first solution (recommended for cleaner route)
+            1=> 
+                                findOneAndUpdate(
+                                    req.params.id, 
+                                    req.body,
+                                    {new: true}
+                                )
+            2=>  in validation 
+                        .custom((val, { req }) => {
+                                req.body.slug = slugify(val);
+                                return true;
+                                }),
+
+        2. second solution 
+            1=> create a middleware
+
+                exports.applySlugify = (req, res, next) => {
+                    req.body.slug = slugify(req.body.name)
+                    next()
+                }
+
+            2=> router.put(updateBrandValidator, applySlugify, updateBrand)
+
+
+33- we separate all CRUD operation in handlersFactory.js file and reuse all functions in all models controllers

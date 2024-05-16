@@ -14,11 +14,17 @@ exports.deleteOne = (Model) =>
     res.status(204).send();
   });
 
+// to apply slugify using a middleware instead of custom in validation
+// exports.applySlugify = (req, res, next) => {
+//   req.body.slug = slugify(req.body.name);
+//   next();
+// };
+
 exports.updateOne = (Model) =>
   asyncHandler(async (req, res, next) => {
     const document = await Model.findByIdAndUpdate(
       req.params.id,
-      req.body,
+      req.body, // slug using slugify => use a middleware or add it in custom validation
       { new: true } // and then return the updated document
     );
 
