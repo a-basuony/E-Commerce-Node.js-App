@@ -3,7 +3,7 @@ const asyncHandler = require("express-async-handler");
 const ApiError = require("../utils/apiError");
 const ApiFeatures = require("../utils/apiFeatures");
 
-exports.getAll = (Model) => {
+exports.getAll = (Model, modelName = "") => {
   return asyncHandler(async (req, res, next) => {
     let filter = {};
     if (req.filterObj) {
@@ -14,7 +14,7 @@ exports.getAll = (Model) => {
     const apiFeatures = new ApiFeatures(Model.find(filter), req.query)
       .filter()
       .sort()
-      .search()
+      .search(modelName)
       .limitFields()
       .paginate(documentsCount);
 

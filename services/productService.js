@@ -6,7 +6,7 @@ const factory = require("./handlersFactory");
  * @route GET /api/v1/products
  * @access Public
  */
-exports.getProducts = factory.getAll(Product);
+exports.getProducts = factory.getAll(Product, "Products");
 // exports.getProducts = asyncHandler(async (req, res, next) => {
 //   const countOfDocuments = await Product.countDocuments();
 

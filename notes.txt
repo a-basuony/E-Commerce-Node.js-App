@@ -1637,3 +1637,25 @@
 
 
     make all CRUD operation like update 
+
+
+34- mongoose query to populate add to Model
+
+    productSchema.pre(/^find/, function (next) {
+        this.populate({
+            path: "category",
+            select: "name -_id",
+        });
+
+        next();
+    });
+
+
+
+
+    -------------   Summary  ------------------------
+            => product CRUD operation
+            => Apply Api features (filtration, pagination, Sorting, Search, Limit Fields)
+            => Make Api features reuseable
+            => make Handlers reuseable
+            => use Mongoose Middleware (populate)

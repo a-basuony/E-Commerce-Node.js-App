@@ -58,6 +58,7 @@ exports.getSubCategories = factory.getAll(SubCategory);
  */
 exports.getSpecificSubCategory = factory.getOne(SubCategory);
 
+// Nested Route in create subCategory
 exports.setCategoryIdToBody = (req, res, next) => {
   if (!req.body.category) {
     req.body.category = req.params.categoryId;
