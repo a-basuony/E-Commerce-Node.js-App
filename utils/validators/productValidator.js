@@ -12,8 +12,12 @@ exports.createProductValidator = [
     .trim()
     .withMessage("Product title must be between 2 and 100 characters")
     .notEmpty()
-    .withMessage("Product required"),
-  check("slug").isLowercase().withMessage("Slug must be a lowercase string"),
+    .withMessage("Product required")
+    .custom((val, { req }) => {
+      req.body.slug = slugify(val);
+      return true;
+    }),
+  check("slug").optional(),
   check("description")
     .isString()
     .isLength({ min: 2, max: 1000 })

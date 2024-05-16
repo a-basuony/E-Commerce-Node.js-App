@@ -66,15 +66,17 @@ exports.getProduct = asyncHandler(async (req, res, next) => {
  * @route  POST /api/v1/products
  * @access Private
  */
-exports.createProduct = asyncHandler(async (req, res, next) => {
-  req.body.slug = slugify(req.body.title);
+exports.createProduct = factory.createOne(Product);
 
-  const product = await Product.create(req.body);
-  if (!product) {
-    return next(new ApiError("Failed to create product", 400));
-  }
-  res.status(201).json({ data: product });
-});
+// exports.createProduct = asyncHandler(async (req, res, next) => {
+//   req.body.slug = slugify(req.body.title);
+
+//   const product = await Product.create(req.body);
+//   if (!product) {
+//     return next(new ApiError("Failed to create product", 400));
+//   }
+//   res.status(201).json({ data: product });
+// });
 
 /**
  * @desc Update a product with id
@@ -84,40 +86,9 @@ exports.createProduct = asyncHandler(async (req, res, next) => {
 
 exports.updateProduct = factory.updateOne(Product);
 
-// exports.updateProduct = asyncHandler(async (req, res, next) => {
-//   const { id } = req.params;
-//   if (req.body.title) {
-//     req.body.slug = slugify(req.body.title);
-//   }
-
-//   const product = await Product.findByIdAndUpdate({ _id: id }, req.body, {
-//     new: true,
-//   }).populate({
-//     path: "category",
-//     select: "name",
-//   });
-//   if (!product) {
-//     return next(
-//       new ApiError(`failed to update product for this id: ${id}`, 400)
-//     );
-//   }
-//   res.status(200).json({ data: product });
-// });
-
 /**
  * @desc     Delete a product
  * @route    DELETE /api/v1/products/:id
  * @access   Private
  */
 exports.deleteProduct = factory.deleteOne(Product);
-
-// exports.deleteProduct = asyncHandler(async (req, res, next) => {
-//   const { id } = req.params;
-//   const product = await Product.findByIdAndDelete(id);
-//   if (!product) {
-//     return next(
-//       new ApiError(`failed to delete product for this id: ${id}`, 404)
-//     );
-//   }
-//   res.status(200).json({ message: "Deleted product successfully" });
-// });

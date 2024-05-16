@@ -79,19 +79,21 @@ exports.setCategoryIdToBody = (req, res, next) => {
  * @route    POST /api/v1/Subcategories
  * @access   Private
  */
-exports.createSubCategory = asyncHandler(async (req, res) => {
-  const { name, category } = req.body;
-  const subCategory = await SubCategory.create({
-    name: name,
-    slug: slugify(name),
-    category, //  as a body it will be added as a subcategory of the provided category
-  });
+exports.createSubCategory = factory.createOne(SubCategory);
 
-  if (!subCategory) {
-    throw new ApiError("Failed to create Subcategory", 400);
-  }
-  res.status(201).json({ data: subCategory });
-});
+// exports.createSubCategory = asyncHandler(async (req, res) => {
+//   const { name, category } = req.body;
+//   const subCategory = await SubCategory.create({
+//     name: name,
+//     slug: slugify(name),
+//     category, //  as a body it will be added as a subcategory of the provided category
+//   });
+
+//   if (!subCategory) {
+//     throw new ApiError("Failed to create Subcategory", 400);
+//   }
+//   res.status(201).json({ data: subCategory });
+// });
 
 /**
  * @desc  Update a Subcategory
