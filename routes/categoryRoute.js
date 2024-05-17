@@ -1,10 +1,12 @@
 const express = require("express");
+
 const {
   createCategory,
   getCategories,
   getCategoryById,
   updateCategory,
   deleteCategory,
+  uploadCategoryImage,
 } = require("../services/categoryService");
 
 const router = express.Router();
@@ -18,12 +20,15 @@ const {
 
 const subCategoriesRoute = require("./subCategoryRoute");
 
+// Nested routes for subcategories
 router.use("/:categoryId/subcategories", subCategoriesRoute);
+
+console.log("uploadCategoryImage:", uploadCategoryImage); // Add this line to check if uploadCategoryImage is defined
 
 router
   .route("/")
   .get(getCategories)
-  .post(createCategoryValidator, createCategory);
+  .post(uploadCategoryImage, createCategoryValidator, createCategory);
 // instead of
 // router.get("/", createCategory);
 // router.post("/", createCategory);

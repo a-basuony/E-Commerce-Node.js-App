@@ -1,3 +1,6 @@
+const multer = require("multer");
+const { v4: uuidv4 } = require("uuid");
+
 const Category = require("../models/categoryModel");
 const factory = require("./handlersFactory");
 
@@ -6,25 +9,27 @@ const factory = require("./handlersFactory");
 // @route    GET /api/v1/categories
 // @access   Public
 */
+// Setup multer for file uploads
+
+//3
+// to generate a unique id uuidv4(); // unique id ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
+const multerStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "uploads/categories");
+  },
+  filename: (req, file, cb) => {
+    const ext = file.mimetype.split("/")[1];
+    const filename = `category-${uuidv4()}-${Date.now()}.${ext}`;
+    cb(null, filename);
+    // cb(null, `category-${Date.now()}.${ext}`);
+  },
+});
+//4
+const upload = multer({ storage: multerStorage });
+//5
+const uploadCategoryImage = upload.single("image");
+
 const getCategories = factory.getAll(Category);
-// const getCategories = asyncHandler(async (req, res, next) => {
-//   //Build Query
-//   const documentsCount = await Category.countDocuments();
-//   const apiFeatures = new ApiFeatures(Category.find({}), req.query)
-//     .filter()
-//     .sort()
-//     // .search()
-//     .limitFields()
-//     .paginate(documentsCount);
-
-//   // Execute query
-//   const { mongooseQuery, paginationResult } = apiFeatures;
-//   const categories = await mongooseQuery;
-
-//   res
-//     .status(200)
-//     .json({ results: categories.length, paginationResult, data: categories });
-// });
 
 /**
  // @desc Get specific category by id
@@ -47,7 +52,7 @@ const createCategory = factory.createOne(Category);
 */
 const updateCategory = factory.updateOne(Category);
 
-/* 
+/**  
 //  @desc Delete a category from database by its id
 //  @route DELETE /api/v1/categories/:id
 //  @access Private
@@ -55,6 +60,7 @@ const updateCategory = factory.updateOne(Category);
 const deleteCategory = factory.deleteOne(Category);
 
 module.exports = {
+  uploadCategoryImage,
   getCategories,
   getCategoryById,
   createCategory,
