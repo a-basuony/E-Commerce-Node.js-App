@@ -1662,143 +1662,159 @@
 
 
 35- File uploading in Node
-     using multer 
+    using multer 
         (you can read docs on 1.npm or 2.repo github or on 3.express)
-        => npm i multer 
+    => npm i multer 
 
-       1.=> 
-            const multer  = require('multer') 
+    => There are two different ways to handle file storage using Multer
 
-            const upload = multer({ dest: 'uploads/' })
+        1- Disk Storage:
+                Use disk storage when you want to save files permanently on your server's disk. 
+                This is useful when you want to allow users to download the files they have uploaded, or when you want to keep the files for future reference. 
+                Disk storage is also useful when you need to store large files that cannot be stored in memory.
 
-                // 'uploads' => name of folder to save the photos
-                // 'uploads/categories' => uploads parent folder / categories child folder 
-                // to specify the destination of folder upload images
-                // مكان الصور (Disk Storage, Memory Storage)
+        2- Memory Storage:
+                Use memory storage when you want to temporarily store files in memory. 
+                This is useful when you need to process the files (like resizing images) before saving them to a disk.
+                Memory storage is also useful when you want to limit the size of the files that can be uploaded, as it can prevent users from uploading large files that could fill up your disk storage.
 
-            const upload = multer({ storage: multerStorage })
-                        // to generate a unique id uuidv4(); // unique id ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
-                            const multerStorage = multer.diskStorage({
-                                destination: (req, file, cb) => {
-                                    cb(null, "uploads/img/categories");
-                                },
-                                filename: (req, file, cb) => {
-                                    const ext = file.mimetype.split("/")[1];
-                                    const filename = `category-${uuidv4()}-${Date.now()}.${ext}`;
-                                    cb(null, filename);
-                                    // cb(null, `category-${Date.now()}.${ext}`);
-                                },
-                            });
+    1- Disk Storage: 
+            1.=> 
+                    const multer  = require('multer') 
 
-                // storage: =>  to control   // مكان  تخزين الصور 
-                // multerStorage => variable i will create it to specify the image (name & destination)
-            
-        2.=>    //=> use uuid package to generate a unique id 
-                    //=> npm i uuid 
-                        const { v4: uuidv4 } = require('uuid');
-                        uuidv4(); // ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
+                    const upload = multer({ dest: 'uploads/' })
 
-                    1. const {v4: uuidv4 } = require('uuid)
-                    2. uuidv4() //=> function to generate a unique id in place you want to the id
+                        // 'uploads' => name of folder to save the photos
+                        // 'uploads/categories' => uploads parent folder / categories child folder 
+                        // to specify the destination of folder upload images
+                        // مكان الصور (Disk Storage, Memory Storage)
+                    // => Disk Storage => save the images on disk
+                    const upload = multer({ storage: multerStorage })
+                                // to generate a unique id uuidv4(); // unique id ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
+                                    const multerStorage = multer.diskStorage({
+                                        destination: (req, file, cb) => {
+                                            cb(null, "uploads/img/categories");
+                                        },
+                                        filename: (req, file, cb) => {
+                                            const ext = file.mimetype.split("/")[1];
+                                            const filename = `category-${uuidv4()}-${Date.now()}.${ext}`;
+                                            cb(null, filename);
+                                            // cb(null, `category-${Date.now()}.${ext}`);
+                                        },
+                                    });
 
-    ---------------  summary  -----------
-    1- install (multer & uuid)
-            npm install multer uuid
-
-    2- import module (multer & uuid)
-                const multer = require('multer');
-                const { v4: uuidv4 } = require("uuid");
-
-    3- Configure Multer Storage settings
-
-            const multerStorage = multer.diskStorage({
-                    destination: (req, file, cb) => {
-                        cb(null, "uploads/img/categories");
-                    },
-                    filename: (req, file, cb) => {
-                        const ext = file.mimetype.split("/")[1];
-                        const filename = `category-${uuidv4()}-${Date.now()}.${ext}`;
-                        cb(null, filename);
-                        // cb(null, `category-${Date.now()}.${ext}`);
-                    },
-            });
-
-                // destination : is responsible for specifying the directory where the uploaded files will be stored 
-                     - it will create a new directory named uploads in the root of your application if it doesn't exist already. 
-                        Then, it will save the uploaded file in this directory with the filename generated by the filename function.
-                     - The cb function is a callback function that takes two arguments: an error (err) and a result (result).
-                        If there is an error, you can pass it as the first argument to the callback function, and if everything goes well, you can pass null as the first argument.
-                     - The second argument is the path where the file should be saved.
-
-                // filename :(req, file, cb)
-                     file => file {
-                                fieldname: 'image',
-                                originalname: 'new.png',
-                                encoding: '7bit',
-                                mimetype: 'image/png'
-                            }
-                    - file.mimetype => image.jpg (name & extension )
-                    - file.mimetype.split("/")[1] => jpg (extension)
-                    - uuidv4() => generate a unique id
-                    - Date.now() => current time in milliseconds
-                    - filename => category-uuidv4-current time in milliseconds.jpg
-                    - cb()  like  next() in express 
-                    - cb(null, true)  => success with no Errors
-                    - cb( new Error('An Error happen'), false) => failed with error
+                        // storage: =>  to control   // مكان  تخزين الصور 
+                        // multerStorage => variable i will create it to specify the image (name & destination)
                     
-                    - cb(null, filename) => save the file with the specified name in the specified directory
-                    - cb(null, `category-${Date.now()}.${ext}`); => save the file with the specified name in the specified directory
-                    - It is responsible for generating a unique filename for the uploaded file.
-                    - The filename function takes three arguments: req (request object), file (uploaded file), and cb (callback function).
-                    - The cb function is a callback function that takes two arguments: an error (err) and a result (result). If there is an error, you can pass err as the first argument to the callback function, and if everything goes well, you can pass filename as the first argument to the callback function.
-                    - The filename function generates a unique filename for the uploaded file by combining a unique ID generated by uuidv4() function and the current timestamp.
-                    - The generated filename is then passed as the first argument to the callback function.
+                2.=>    //=> use uuid package to generate a unique id 
+                            //=> npm i uuid 
+                                const { v4: uuidv4 } = require('uuid');
+                                uuidv4(); // ⇨ '1b9d6bcd-bbfd-4b2d-9b5d-ab8dfbbd4bed'
+
+                            1. const {v4: uuidv4 } = require('uuid)
+                            2. uuidv4() //=> function to generate a unique id in place you want to the id
+
+
+            => 
+
+            ---------------  summary  -----------
+            1- install (multer & uuid)
+                    npm install multer uuid
+
+            2- import module (multer & uuid)
+                        const multer = require('multer');
+                        const { v4: uuidv4 } = require("uuid");
+
+            3- Configure Multer Storage settings
+
+                    const multerStorage = multer.diskStorage({
+                            destination: (req, file, cb) => {
+                                cb(null, "uploads/img/categories");
+                            },
+                            filename: (req, file, cb) => {
+                                const ext = file.mimetype.split("/")[1];
+                                const filename = `category-${uuidv4()}-${Date.now()}.${ext}`;
+                                cb(null, filename);
+                                // cb(null, `category-${Date.now()}.${ext}`);
+                            },
+                    });
+
+                        // destination : is responsible for specifying the directory where the uploaded files will be stored 
+                            - it will create a new directory named uploads in the root of your application if it doesn't exist already. 
+                                Then, it will save the uploaded file in this directory with the filename generated by the filename function.
+                            - The cb function is a callback function that takes two arguments: an error (err) and a result (result).
+                                If there is an error, you can pass it as the first argument to the callback function, and if everything goes well, you can pass null as the first argument.
+                            - The second argument is the path where the file should be saved.
+
+                        // filename :(req, file, cb)
+                            file => file {
+                                        fieldname: 'image',
+                                        originalname: 'new.png',
+                                        encoding: '7bit',
+                                        mimetype: 'image/png'
+                                    }
+                            - file.mimetype => image.jpg (name & extension )
+                            - file.mimetype.split("/")[1] => jpg (extension)
+                            - uuidv4() => generate a unique id
+                            - Date.now() => current time in milliseconds
+                            - filename => category-uuidv4-current time in milliseconds.jpg
+                            - cb()  like  next() in express 
+                            - cb(null, true)  => success with no Errors
+                            - cb( new Error('An Error happen'), false) => failed with error
+                            
+                            - cb(null, filename) => save the file with the specified name in the specified directory
+                            - cb(null, `category-${Date.now()}.${ext}`); => save the file with the specified name in the specified directory
+                            - It is responsible for generating a unique filename for the uploaded file.
+                            - The filename function takes three arguments: req (request object), file (uploaded file), and cb (callback function).
+                            - The cb function is a callback function that takes two arguments: an error (err) and a result (result). If there is an error, you can pass err as the first argument to the callback function, and if everything goes well, you can pass filename as the first argument to the callback function.
+                            - The filename function generates a unique filename for the uploaded file by combining a unique ID generated by uuidv4() function and the current timestamp.
+                            - The generated filename is then passed as the first argument to the callback function.
 
 
 
 
 
-    4- create a multer instance with the configured storage sittings
+            4- create a multer instance with the configured storage sittings
 
-            const upload = multer({ storage: multerStorage });
+                    const upload = multer({ storage: multerStorage });
 
-    5- use multer instance to handle file uploads in your routes
+            5- use multer instance to handle file uploads in your routes
 
-        app.post('/upload', upload.single('file'), (req, res) => {
-            // Handle the uploaded file
-            console.log(req.file);
-            res.send('File uploaded successfully!');
-        });
+                app.post('/upload', upload.single('file'), (req, res) => {
+                    // Handle the uploaded file
+                    console.log(req.file);
+                    res.send('File uploaded successfully!');
+                });
 
-        // (or you can export it and import it in routes )
-        1.export
-            exports.uploadCategoryImage = upload.single("image");
-        2.import in router file
-            router
-                .route("/")
-                .get(getCategories)
-                .post(uploadCategoryImage, createCategoryValidator, createCategory);
-
-
+                // (or you can export it and import it in routes )
+                1.export
+                    exports.uploadCategoryImage = upload.single("image");
+                2.import in router file
+                    router
+                        .route("/")
+                        .get(getCategories)
+                        .post(uploadCategoryImage, createCategoryValidator, createCategory);
 
 
-    6- function to ensure that only image files are allowed to upload otherwise an error 
 
-            const multerFilter = function (req, file, cb) {
-                    if (file.mimetype.startsWith("image")) {
-                        cb(null, true); // Allow the file to be uploaded
-                    } else {
-                        cb(new ApiError("Only Images allowed", 400), false); // Disallow the file to be uploaded
-                    }
-            };
-                //multerFilter function is used to ensure that only image files are allowed to be uploaded using the multer library.
-                //to filter the files that are allowed to be uploaded.
-                //It takes three arguments: req (request object), file (the file being uploaded), and cb (a callback function).
-                //if statement checks if the file.mimetype starts with "image". If it does, the cb(null, true) statement is executed, which means that the file is allowed to be uploaded.
-                // file.mimetype does not start with "image", the cb(new ApiError("Only Images allowed", 400), false) statement is executed, which means that the file is not allowed to be uploaded and an error response with status code 400 is returned.
-                
-            //4
-            const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+
+            6- function to ensure that only image files are allowed to upload otherwise an error 
+
+                    const multerFilter = function (req, file, cb) {
+                            if (file.mimetype.startsWith("image")) {
+                                cb(null, true); // Allow the file to be uploaded
+                            } else {
+                                cb(new ApiError("Only Images allowed", 400), false); // Disallow the file to be uploaded
+                            }
+                    };
+                        // multerFilter function is used to ensure that only image files are allowed to be uploaded using the multer library.
+                        // to filter the files that are allowed to be uploaded.
+                        // It takes three arguments: req (request object), file (the file being uploaded), and cb (a callback function).
+                        // if statement checks if the file.mimetype starts with "image". If it does, the cb(null, true) statement is executed, which means that the file is allowed to be uploaded.
+                        //  file.mimetype does not start with "image", the cb(new ApiError("Only Images allowed", 400), false) statement is executed, which means that the file is not allowed to be uploaded and an error response with status code 400 is returned.
+
+                    //4
+                    const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 
 
         ----------------
@@ -1816,3 +1832,21 @@
 
       test  => when create data using postman
             post > form-data > name : ahmed > image ^ file : image.name
+    2- Memory Storage: 
+        we use Image Processing package like (sharp)
+
+36- Remember that memory storage is not suitable for storing large files, as it can consume a lot of memory and may cause your server to run out of memory. If you need to store large files, you should use disk storage instead.
+    Memory Storage => temporarily store files in memory & you need to process the files (like: resizing images)
+    Disk Storage => files permanently large files  & cause server to run out 
+
+    
+
+36- Image processing
+
+    sharp => we use package sharp to convert large images to smaller , web friendly 
+        install => npm i sharp
+
+        const sharp = require('sharp')
+        sharp('inputBuffer.jpg')  // as a Buffer so we need to save image as a buffer using multer not diskStorage
+
+

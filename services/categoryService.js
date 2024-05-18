@@ -28,6 +28,12 @@ const multerStorage = multer.diskStorage({
 
 // 3 add this step
 //multerFilter function is used to ensure that only image files are allowed to be uploaded using the multer library.
+
+// if=> file.mimetype.startsWith("image")||
+//   file.mimetype === "image/png" ||
+//   file.mimetype === "image/jpg" ||
+//   file.mimetype === "image/jpeg"
+
 const multerFilter = function (req, file, cb) {
   if (file.mimetype.startsWith("image")) {
     cb(null, true); // Allow the file to be uploaded
