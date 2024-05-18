@@ -7,6 +7,7 @@ const {
   updateCategory,
   deleteCategory,
   uploadCategoryImage,
+  resizeImage,
 } = require("../services/categoryService");
 
 const router = express.Router();
@@ -28,7 +29,12 @@ console.log("uploadCategoryImage:", uploadCategoryImage); // Add this line to ch
 router
   .route("/")
   .get(getCategories)
-  .post(uploadCategoryImage, createCategoryValidator, createCategory);
+  .post(
+    uploadCategoryImage,
+    resizeImage,
+    createCategoryValidator,
+    createCategory
+  );
 // instead of
 // router.get("/", createCategory);
 // router.post("/", createCategory);

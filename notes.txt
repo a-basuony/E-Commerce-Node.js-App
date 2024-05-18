@@ -1835,11 +1835,56 @@
     2- Memory Storage: 
         we use Image Processing package like (sharp)
 
-36- Remember that memory storage is not suitable for storing large files, as it can consume a lot of memory and may cause your server to run out of memory. If you need to store large files, you should use disk storage instead.
-    Memory Storage => temporarily store files in memory & you need to process the files (like: resizing images)
+36- Summary Remember that memory storage is not suitable for storing large files, as it can consume a lot of memory and may cause your server to run out of memory. If you need to store large files, you should use disk storage instead.
     Disk Storage => files permanently large files  & cause server to run out 
+        Example : // Setup multer for file uploads
+                        //1
+                        const multer = require("multer");
+                        //2
+                        const { v4: uuidv4 } = require("uuid");
 
-    
+        
+                        //3
+
+                        // file.mimetype => mimetype: 'image/png' (type of file / extension of file)
+
+                        const multerStorage = multer.diskStorage({
+                            destination: (req, file, cb) => {
+                                cb(null, "uploads/categories");
+                            },
+                            filename: (req, file, cb) => {
+                                const ext = file.mimetype.split("/")[1];
+                                const filename = `category-${uuidv4()}-${Date.now()}.${ext}`;
+                                cb(null, filename);
+                            },
+                        });
+
+                        // 4 add this step
+                        //multerFilter function is used to ensure that only image files are allowed to be uploaded using the multer library.
+
+                        // if=> file.mimetype.startsWith("image")||
+                        //   file.mimetype === "image/png" ||
+                        //   file.mimetype === "image/jpg" ||
+                        //   file.mimetype === "image/jpeg"
+
+                        const multerFilter = function (req, file, cb) {
+                            if (file.mimetype.startsWith("image")) {
+                                cb(null, true); // Allow the file to be uploaded
+                            } else {
+                                cb(new ApiError("Only Images allowed", 400), false); // Disallow the file to be uploaded
+                            }
+                        };
+                        //5
+                        const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+                        //6
+                        exports.uploadCategoryImage = upload.single("image");
+                        //7 
+                        router.route("/").post(uploadCategoryImage, createCategoryValidator, createCategory);
+
+
+    Memory Storage => temporarily store files in memory & you need to process the files (like: resizing images)
+
+
 
 36- Image processing
 

@@ -1,39 +1,32 @@
+const asyncHandler = require("express-async-handler");
 const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
+const sharp = require("sharp");
 
 const Category = require("../models/categoryModel");
 const factory = require("./handlersFactory");
 const ApiError = require("../utils/apiError");
 
-/**
-// @desc     Get all categories
-// @route    GET /api/v1/categories
-// @access   Public
-*/
 // Setup multer for file uploads
 
-//3
-const multerStorage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "uploads/categories");
-  },
-  filename: (req, file, cb) => {
-    const ext = file.mimetype.split("/")[1];
-    // file.mimetype => mimetype: 'image/png' (type of file / extension of file)
-    const filename = `category-${uuidv4()}-${Date.now()}.${ext}`;
-    cb(null, filename);
-    // cb(null, `category-${Date.now()}.${ext}`);
-  },
-});
+//3- DiskStorage
+// const multerStorage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "uploads/categories");
+//   },
+//   filename: (req, file, cb) => {
+//     const ext = file.mimetype.split("/")[1];
+//     const filename = `category-${uuidv4()}-${Date.now()}.${ext}`;
+//     cb(null, filename);
+//   },
+// });
 
-// 3 add this step
-//multerFilter function is used to ensure that only image files are allowed to be uploaded using the multer library.
+// ------ -----------
 
-// if=> file.mimetype.startsWith("image")||
-//   file.mimetype === "image/png" ||
-//   file.mimetype === "image/jpg" ||
-//   file.mimetype === "image/jpeg"
+//3- Memory Storage
+const multerStorage = multer.memoryStorage();
 
+//4- multerFilter => ensure that only image files
 const multerFilter = function (req, file, cb) {
   if (file.mimetype.startsWith("image")) {
     cb(null, true); // Allow the file to be uploaded
@@ -46,6 +39,22 @@ const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
 //5
 const uploadCategoryImage = upload.single("image");
 
+const resizeImage = asyncHandler(async (req, res, next) => {
+  const filename = `category-${uuidv4()}-${Date.now()}.jpeg`;
+  await sharp(req.file.buffer)
+    .resize(600, 600)
+    .toFormat("jpeg")
+    .jpeg({ quality: 90 })
+    .toFile(`uploads/categories/${filename}`);
+
+  next();
+});
+
+/**
+// @desc     Get all categories
+// @route    GET /api/v1/categories
+// @access   Public
+*/
 const getCategories = factory.getAll(Category);
 
 /**
@@ -78,6 +87,7 @@ const deleteCategory = factory.deleteOne(Category);
 
 module.exports = {
   uploadCategoryImage,
+  resizeImage,
   getCategories,
   getCategoryById,
   createCategory,
