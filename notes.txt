@@ -1883,7 +1883,51 @@
 
 
     Memory Storage => temporarily store files in memory & you need to process the files (like: resizing images)
+            //1 imports
+                const asyncHandler = require("express-async-handler");
+                const multer = require("multer");
+                const { v4: uuidv4 } = require("uuid");
+                const sharp = require("sharp");
 
+    
+            //2- Memory Storage
+                const multerStorage = multer.memoryStorage();
+
+                            //
+            //4- multerFilter => ensure that only image files
+
+                    const multerFilter = function (req, file, cb) {
+                        if (file.mimetype.startsWith("image")) {
+                            cb(null, true); // Allow the file to be uploaded
+                        } else {
+                            cb(new ApiError("Only Images allowed", 400), false); // Disallow the file to be uploaded
+                        }
+                    };
+            //4
+                const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+            //5
+                exports.uploadCategoryImage = upload.single("image");
+            //6
+                exports.resizeImage = asyncHandler(async (req, res, next) => {
+                    const filename = `category-${uuidv4()}-${Date.now()}.jpeg`;
+                    await sharp(req.file.buffer)
+                        .resize(600, 600)  //=> size
+                        .toFormat("jpeg")  //=> convert extensions to jpeg
+                        .jpeg({ quality: 90 }) //=> decrease the quality
+                        .toFile(`uploads/categories/${filename}`); //=> image directory & image name
+
+                    next();
+                });
+
+            //7 
+                router
+                    .route("/")
+                    .post(
+                        uploadCategoryImage,
+                        resizeImage,
+                        createCategoryValidator,
+                        createCategory
+                    );
 
 
 36- Image processing

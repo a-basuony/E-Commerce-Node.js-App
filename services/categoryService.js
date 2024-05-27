@@ -44,7 +44,7 @@ const resizeImage = asyncHandler(async (req, res, next) => {
   await sharp(req.file.buffer)
     .resize(600, 600)
     .toFormat("jpeg")
-    .jpeg({ quality: 90 })
+    .jpeg({ quality: 95 })
     .toFile(`uploads/categories/${filename}`);
 
   next();
