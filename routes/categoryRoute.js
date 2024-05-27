@@ -42,7 +42,12 @@ router
 router
   .route("/:id")
   .get(getCategoryValidator, getCategoryById)
-  .put(updateCategoryValidator, updateCategory)
+  .put(
+    uploadCategoryImage,
+    resizeImage,
+    updateCategoryValidator,
+    updateCategory
+  )
   .delete(deleteCategoryValidator, deleteCategory); //localhost:3000/api/v1/categories/66082b89921a97fa27a5f5d9
 
 module.exports = router;

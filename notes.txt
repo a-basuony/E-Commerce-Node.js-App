@@ -1936,6 +1936,96 @@
         install => npm i sharp
 
         const sharp = require('sharp')
-        sharp('inputBuffer.jpg')  // as a Buffer so we need to save image as a buffer using multer not diskStorage
+        sharp('inputBuffer.jpg')  // as a Buffer so we need to save image as a buffer using multer as a Memory Storage(memoryStorage return a buffer) not diskStorage
+
+
+         exports.resizeImage = asyncHandler(async (req, res, next) => {
+                    const filename = `category-${uuidv4()}-${Date.now()}.jpeg`;
+                    await sharp(req.file.buffer)
+                        .resize(600, 600)  //=> size
+                        .toFormat("jpeg")  //=> convert extensions to jpeg
+                        .jpeg({ quality: 90 }) //=> decrease the quality
+                        .toFile(`uploads/categories/${filename}`); //=> image directory & image name
+
+                    next();
+                });
+
+
+        explanation: 
+            This resizeImage middleware:
+                Generates a unique filename for the image.
+                Uses the Sharp library to resize the image to 600x600 pixels, convert it to JPEG format, and reduce its quality to 90.
+                Saves the processed image to the uploads/categories/ directory with the generated filename.
+                Calls the next middleware in the Express stack after processing the image.
+
+    In summary, `req.file.buffer` in this code comes from the `multer` middleware configured to use memory storage. Here’s a step-by-step explanation:
+
+                ### 1. Memory Storage Configuration
+
+                ```javascript
+                const multerStorage = multer.memoryStorage();
+                ```
+                - This sets up `multer` to store uploaded files in memory as `Buffer` objects. This means that the files are not written to disk but are kept in memory.
+
+                ### 2. File Filter Function
+
+                ```javascript
+                const multerFilter = function (req, file, cb) {
+                if (file.mimetype.startsWith("image")) {
+                    cb(null, true); // Allow the file to be uploaded
+                } else {
+                    cb(new ApiError("Only Images allowed", 400), false); // Disallow the file to be uploaded
+                }
+                };
+                ```
+                - This function filters the uploaded files to ensure only image files are accepted. If the file's MIME type starts with "image", it is accepted; otherwise, an error is returned.
+
+                ### 3. Multer Setup
+
+                ```javascript
+                const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
+                ```
+                - This sets up `multer` with the memory storage configuration and the file filter. 
+
+                ### 4. Single File Upload
+
+                ```javascript
+                const uploadCategoryImage = upload.single("image");
+                ```
+                - This middleware handles single file uploads with the field name "image". After this middleware runs, the uploaded file is available in `req.file`.
+
+                ### 5. Resize Image Middleware
+
+                ```javascript
+                const resizeImage = asyncHandler(async (req, res, next) => {
+                const filename = `category-${uuidv4()}-${Date.now()}.jpeg`;
+                await sharp(req.file.buffer)
+                    .resize(600, 600)
+                    .toFormat("jpeg")
+                    .jpeg({ quality: 95 })
+                    .toFile(`uploads/categories/${filename}`);
+
+                next();
+                });
+                ```
+                - This middleware processes the uploaded image:
+                - It generates a unique filename for the image.
+                - It uses the `sharp` library to resize the image to 600x600 pixels, convert it to JPEG format, and set the quality to 95.
+                - It saves the processed image to the specified directory with the generated filename.
+                - Finally, it calls `next()` to pass control to the next middleware.
+
+                ### Summary
+                 File Processing: Based on the configuration provided to Multer, it processes the incoming file(s). In the given code, Multer is configured with multer.memoryStorage(). This means that instead of storing the uploaded files on disk, Multer stores them in memory as Buffer objects.
+                 Storing in Memory: When Multer processes the file and decides to store it in memory, it reads the entire file into a Buffer object. This Buffer object contains the raw binary data of the file, including all its content and metadata.
+                 Accessing the Buffer: After Multer has processed the file and made it available in memory, the file information, including the Buffer object (req.file.buffer), is passed along to the next middleware or route handler in the stack. This is why, within the resizeImage function, req.file.buffer is accessible—it contains the raw binary data of the uploaded file.
+                 Usage in Route Handler: In the resizeImage function, req.file.buffer is used as the source for the Sharp library to perform operations on the image file, such as resizing and formatting, before saving it to disk.
+
+
+                 In essence, req.file.buffer is a direct result of Multer's memory storage option, which allows uploaded files to be accessed as Buffer objects in memory, making them readily available for further processing or manipulation by other middleware or route handlers in an Express.js application.
+                - `req.file.buffer` is populated by `multer` configured with `memoryStorage()`, which stores the uploaded file as a `Buffer` in memory.
+                - The `multer` middleware processes the file upload, ensuring it’s an image through the `multerFilter`.
+                - Once the file is uploaded and stored in memory, it becomes available at `req.file.buffer` for subsequent middleware (like `resizeImage`) to process it further.
+
+
 
 

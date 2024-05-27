@@ -47,6 +47,8 @@ const resizeImage = asyncHandler(async (req, res, next) => {
     .jpeg({ quality: 95 })
     .toFile(`uploads/categories/${filename}`);
 
+  req.body.image = filename;
+
   next();
 });
 
