@@ -1991,6 +1991,7 @@
 
                 ```javascript
                 const uploadCategoryImage = upload.single("image");
+                    'image' => name in the image in model
                 ```
                 - This middleware handles single file uploads with the field name "image". After this middleware runs, the uploaded file is available in `req.file`.
 
