@@ -17,5 +17,5 @@ exports.uploadSingleImage = (fieldName) => {
   //4
   const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
   //5
-  const uploadCategoryImage = upload.single(fieldName);
+  return upload.single(fieldName);
 };

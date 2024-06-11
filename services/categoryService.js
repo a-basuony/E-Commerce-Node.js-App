@@ -1,49 +1,14 @@
 const asyncHandler = require("express-async-handler");
-// const multer = require("multer");
 const { v4: uuidv4 } = require("uuid");
 const sharp = require("sharp");
 
 const Category = require("../models/categoryModel");
 const factory = require("./handlersFactory");
-// const ApiError = require("../utils/apiError");
 const { uploadSingleImage } = require("../middlewares/uploadImageMiddleware");
 
-// Setup multer for file uploads
-
-//3- DiskStorage
-// const multerStorage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "uploads/categories");
-//   },
-//   filename: (req, file, cb) => {
-//     const ext = file.mimetype.split("/")[1];
-//     const filename = `category-${uuidv4()}-${Date.now()}.${ext}`;
-//     cb(null, filename);
-//   },
-// });
-
-// ------ -----------
-
-// //3- Memory Storage
-// const multerStorage = multer.memoryStorage();
-
-// //4- multerFilter => ensure that only image files
-// const multerFilter = function (req, file, cb) {
-//   if (file.mimetype.startsWith("image")) {
-//     cb(null, true); // Allow the file to be uploaded
-//   } else {
-//     cb(new ApiError("Only Images allowed", 400), false); // Disallow the file to be uploaded
-//   }
-// };
-// //4
-// const upload = multer({ storage: multerStorage, fileFilter: multerFilter });
-// //5
-// const uploadCategoryImage = upload.single("image");
-
-/// ----- after refactor the file and move the multer middleware in single file ----
-
+// upload single image using multer middleware to upload image accept filed name "image"
 const uploadCategoryImage = uploadSingleImage("image");
-
+// image processing
 const resizeImage = asyncHandler(async (req, res, next) => {
   const filename = `category-${uuidv4()}-${Date.now()}.jpeg`;
   await sharp(req.file.buffer)
@@ -51,7 +16,7 @@ const resizeImage = asyncHandler(async (req, res, next) => {
     .toFormat("jpeg")
     .jpeg({ quality: 95 })
     .toFile(`uploads/categories/${filename}`);
-
+  // save image into our db
   req.body.image = filename;
 
   next();
