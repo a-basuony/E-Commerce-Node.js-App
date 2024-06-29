@@ -1,22 +1,22 @@
 const { v4: uuidv4 } = require("uuid");
 const sharp = require("sharp");
-const Brand = require("../models/brandModel");
-const factory = require("./handlersFactory");
 const asyncHandler = require("express-async-handler");
+
+const factory = require("./handlersFactory");
+const Brand = require("../models/brandModel");
 const { uploadSingleImage } = require("../middlewares/uploadImageMiddleware");
 
 ///--- setup the memory storage
-
 exports.uploadBrandImage = uploadSingleImage("image");
 // --- resize middleware
 
 exports.resizeImage = asyncHandler(async (req, res, next) => {
   const filename = `brand-${uuidv4()}-${Date.now()}.jpeg`;
   await sharp(req.file.buffer)
-    .resize(500, 500)
+    .resize(700, 900)
     .toFormat("jpeg")
     .jpeg({ quality: 95 })
-    .toFile(`uploads/brands/${filename}`);
+    .toFile(`uploads/brands/${filename}`); // you need to create the folder name (brands)
 
   // save image into our db
   req.body.image = filename;

@@ -2095,3 +2095,5 @@
         // @access   Public
         */
         const getCategories = factory.getAll(Category);
+
+37- we need to return image url instead the image name
